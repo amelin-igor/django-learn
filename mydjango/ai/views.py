@@ -1856,4 +1856,6 @@ def remotecontrol(request):
     else:
         resp = a.email
 
+    print("hello!")
+
     return resp
