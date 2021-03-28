@@ -22,8 +22,7 @@ from django.contrib.auth import authenticate, login
 import pyodbc
 
 from django import forms
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column
+
 from django.core.mail import send_mail
 #import secrets
 import uuid
