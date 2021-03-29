@@ -19,7 +19,7 @@ from .forms import AuthUserForm, RegisterUserForm,CustomCheckbox
 from django.views.generic import CreateView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-import pyodbc
+
 
 from django import forms
 
@@ -440,7 +440,7 @@ def pdcalc(request):
     print("regn = ")
     print(regn)
 
-    #import pyodbc
+
     #import adodbapi
 
     #database = "MosReg.mdb"
