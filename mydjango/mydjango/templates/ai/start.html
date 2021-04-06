@@ -47,12 +47,12 @@
                           <a class = " nav_link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> Животноводство</a>
                     </li>
                      {% if request.user.is_authenticated %}
-                       {% if request.user.is_superuser %}
+
                     <li>
                         {% url 'ai:nabobj' as url_nabobj %}
                         <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты</a>
                     </li>
-
+                    {% if request.user.is_superuser %}
                     <li>
                         {% url 'ai:starter' Mumuka as url_ai_starter %}
                          <a class = " nav_link {% if url_ai_starter == request.path %}activate{% endif %} " href = "{{url_ai_starter}}"> Мониторинг</a>
