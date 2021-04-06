@@ -29,7 +29,7 @@ def test(request):
 def detal(request , article_id):
 
     try:
-        a = Article.objects.get(id = article_id)
+        a = Article.objects.get(id=article_id)
 
     except:
         raise Http404("Статья не найдена!")
