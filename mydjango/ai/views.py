@@ -27,7 +27,7 @@ from django.core.mail import send_mail
 #import secrets
 import uuid
 import os
-from .forms import account_check
+from .forms import account_check, get_ident
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordChangeDoneView
 
 # import numpy as np
@@ -49,11 +49,26 @@ User = get_user_model()
 
 
 
-password = {
+password_old = {
     'FERM1':'1',
     'FERM2':'2',
     'FERM3':'3',
 }
+
+password = {
+        '00001': '6546556987',
+        '00002': '36645954',
+        '00003': '984544559',
+        '00004': '4565654123',
+        '00005': '4566586123',
+        '00006': '33847866558',
+        '00007': '166954887',
+        '00008': '111265587',
+        '00009': '8642589',
+        '00010': '1155887',
+        '00011': '2865449762',
+        '00012': '159755432',
+    }
 
 #http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
 #http://127.0.0.1:8000/add/?login=FERM2&pasw=2&name=Vestka&t=38&h=25&co2=2&ch4=21&n2o=11
@@ -101,12 +116,7 @@ def page2(request):
     return render(request, 'ai/page2.html')
 
 def add(request):
-    import os
-    import sqlite3
-    import urllib  # URL functions
-    from time import strftime
 
-    import urllib.request  # URL functions
 
     #now = datetime.datetime.now()
     now = timezone.now()
@@ -169,17 +179,16 @@ def add(request):
                     'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
                             data + ' / ' + ': Wrong user name!' + '\n')
 
-    m = Metering(meter_title = name, meter_text = mt, meter_temperature = t, meter_humidity = h, meter_CO2 = co2,
+    m = Metering(meter_identificator = login, meter_title = name, meter_text = mt, meter_temperature = t, meter_humidity = h, meter_CO2 = co2,
                  meter_CH4 = ch4, meter_N2O = n2o, meter_datetime = now )
     m.save()
     #return render(request, 'ai/add.html', {'metering': m})
-    return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
+    #return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
+    return render(request, 'ai/pdstart.html')
 
 
 def show(request):
     q =  Metering.objects.filter(meter_title ="Mumuka")
-    #q = Metering.objects.filter(meter_humidity="13")
-    #q = Metering.objects.filter(meter_datetime ="2020-02-25")
     z = {'metter_of_buryonka': q}
     return render(request, 'ai/show.html', z)
 
@@ -236,10 +245,10 @@ def addcom(request, metering_id):
 def starter(request, meter_title):
 #def starter(request):
    # Acc = account_check(request)
+    ident = get_ident(request)
     try:
-       #q = Metering.objects.filter(meter_title="Yarushka")
-       #q = Metering.objects.filter(meter_title="Mumuka")
-       q = Metering.objects.filter(meter_title=meter_title)
+       q = Metering.objects.filter(meter_title=meter_title, meter_identificator = ident)
+       # q = Metering.objects.filter(meter_title=meter_title)
         #Yarushka
     except:
        raise Http404("Нет запрашиваемых данных")
@@ -371,7 +380,12 @@ def index2(request):
     return render(request, 'ai/list2.html', {'latest_metering_list': latest_metering_list})
 
 def nabobj(request):
-    cow_metering_list = Metering.objects.all()
+
+    ident = get_ident(request)
+    print ('nabobj_ident =')
+    print (ident)
+    #cow_metering_list = Metering.objects.all()
+    cow_metering_list = Metering.objects.filter(meter_identificator = ident)
     X=[]
     for cow in cow_metering_list:
         X.append(cow.meter_title)
@@ -600,6 +614,86 @@ def pdcalc(request):
     }
 
     Dat2 = {
+
+        '0': '1/01/2011',
+        '1': '1/04/2011',
+        '2': '1/07/2011',
+        '3': '1/10/2011',
+        '4': '1/01/2012',
+        '5': '1/04/2012',
+        '6': '1/07/2012',
+        '7': '1/10/2012',
+        '8': '1/01/2013',
+        '9': '1/04/2013',
+        '10': '1/07/2013',
+        '11': '1/10/2013',
+        '12': '1/01/2014',
+        '13': '1/04/2014',
+        '14': '1/07/2014',
+        '15': '1/10/2014',
+        '16': '1/01/2015',
+        '17': '1/04/2015',
+        '18': '1/07/2015',
+        '19': '1/10/2015',
+        '20': '1/01/2016',
+        '21': '1/04/2016',
+        '22': '1/07/2016',
+        '23': '1/10/2016',
+        '24': '1/01/2017',
+        '25': '1/04/2017',
+
+        '26': '1/07/2017',
+        '27': '1/10/2017',
+        '28': '1/01/2018',
+        '29': '1/04/2018',
+        '30': '1/07/2018',
+        '31': '1/10/2018',
+        '32': '1/01/2019',
+        '33': '1/04/2019',
+        '34': '1/07/2019',
+        '35': '1/10/2019',
+        '36': '1/01/2020',
+        '37': '1/04/2020',
+        '38': '1/07/2020',
+        '39': '1/10/2020',
+        '40': '1/01/2021',
+
+        '41': '1/04/2014',
+        '42': '1/07/2014',
+        '43': '1/10/2014',
+        '44': '1/01/2015',
+        '45': '1/04/2015',
+        '46': '1/07/2015',
+        '47': '1/10/2015',
+        '48': '1/01/2016',
+        '49': '1/04/2016',
+        '50': '1/07/2016',
+        '51': '1/10/2016',
+        '52': '1/01/2017',
+        '53': '1/04/2017',
+        '54': '1/07/2017',
+        '55': '1/10/2017',
+        '56': '1/01/2018',
+        '57': '1/04/2018',
+        '58': '1/07/2018',
+        '59': '1/10/2018',
+        '60': '1/01/2019',
+        '61': '1/04/2019',
+        '62': '1/07/2019',
+        '63': '1/10/2019',
+        '64': '1/01/2020',
+        '65': '1/04/2020',
+        '66': '1/07/2020',
+        '67': '1/10/2020',
+        '68': '1/01/2021',
+        '69': '1/04/2021',
+        '70': '1/07/2021',
+        '71': '1/10/2021',
+        '72': '1/01/2022',
+
+    }
+
+    Dat3 = {
 
         '0': '1/01/2004',
         '1': '1/04/2004',
@@ -1433,6 +1527,7 @@ def fillrec(request):
     kpp = request.POST.get('kpp')
     ogrn = request.POST.get('ogrn')
     country = request.POST.get('country')
+    identificator= request.POST.get('identificator')
     codeword = request.POST.get('codeword')
     ul_fl = request.POST.get('ul_fl')
     print('ul_fl =')
@@ -1496,6 +1591,12 @@ def fillrec(request):
         else:
             mist_fild.append('false')
 
+        if len(identificator) != 5:
+            msg += ' введите идентификатор аппаратуры (5 знаков)'
+            mist_fild.append('true')
+        else:
+            mist_fild.append('false')
+
         if codeword != codeword_2:
             msg += ' введите кодовое слово'
             mist_fild.append('true')
@@ -1514,7 +1615,8 @@ def fillrec(request):
                                                          'client_name_2': client_name,
                                                          'client_name_full_2': client_name_full,
                                                          'country_2': country, 'kpp_2': kpp,
-                                                         'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid})
+                                                         'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
+                                                         'identificator_2':identificator})
         else:
             msg_1 = 'Проверка введенных данных выполнена. '
             msg = msg_1 + msg
@@ -1528,11 +1630,12 @@ def fillrec(request):
                                                          'client_name_2': client_name,
                                                          'client_name_full_2': client_name_full,
                                                          'country_2': country, 'kpp_2': kpp,
-                                                         'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid})
+                                                         'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
+                                                         'identificator_2': identificator})
 
     m = Customerrec(client_name = client_name, adres = adres , inn=inn, user_id=request.user.id,
                     client_name_full = client_name_full, country =country, kpp = kpp, ogrn = ogrn,
-                    comment = codeword, vid = vid, datetime = now)
+                    comment = codeword, vid = vid, datetime = now, identificator = identificator)
     m.save()
     msg += 'Реквизиты занесены в базу данных.'
 
