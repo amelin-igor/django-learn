@@ -16,7 +16,8 @@ class Metering(models.Model):
     meter_CH4 = models.IntegerField('CH4', default=0)
     meter_N2O = models.IntegerField('N2O', default=0)
     meter_datetime = models.DateTimeField('дата публикации')
-
+    meter_identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)',
+                                     default='00001')
     def __str__(self):
         return self.meter_title
 
@@ -66,6 +67,7 @@ class Customerrec(models.Model):
     ogrn = models.CharField(max_length=20, verbose_name='ОГРН')
     comment = models.CharField(max_length=200, verbose_name='Кодовое слово')
     vid = models.IntegerField('vid', default=0) # вид контрагента 0 - физлицо; 1 -юрлицо; 2 - ИП
+    identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
 
     datetime = models.DateTimeField('дата регистрации')
 
