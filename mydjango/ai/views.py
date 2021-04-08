@@ -68,6 +68,7 @@ password = {
         '00010': '1155887',
         '00011': '2865449762',
         '00012': '159755432',
+        '00013': '259755432',
     }
 
 #http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
@@ -258,7 +259,7 @@ def starter(request, meter_title):
         y3.append(data.meter_humidity)
     len_all = len(y3)
 
-    latest_data_list = q.order_by('-meter_datetime')[:1000]
+    latest_data_list = q.order_by('-meter_datetime')[:3000]
     z = {'metter_of_buryonka': latest_data_list}
 
     #x1 = [1, 10, 35, 27]
