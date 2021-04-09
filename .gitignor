@@ -1,0 +1,5 @@
+/venv/
+/.idea/
+cow.log
+db.sqlite3
+settings.py
