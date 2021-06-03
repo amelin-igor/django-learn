@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Реквизиты{% endblock %}
+
+{% block content %}
+
+<style type='text/css'>
+	textarea {border-color: blue; }
+	input:checked + span {
+    background: #cf2;
+   }
+</style>
+
+{% if request.user.is_authenticated %}
+
+    <h5> Удаленное управление устройствами </h5>
+
+<div class="col-12">
+    <form action = "{% url 'ai:control_save_page' %}" method = "POST">
+
+        {% csrf_token %}
+        </br>
+
+        {% if dev_1 == True %}
+        <input name="device_1" type="checkbox" title="Устройство 1" value="{{dev_1}}"  checked   > <span> Устройство 1 ( снимите галочку для выключения)</span> </br>
+        {% else %}
+        <input name="device_1" type="checkbox" title="Устройство 1" value="{{dev_1}}"> <span> Устройство 1 (установите галочку для включения )</span> </br>
+        {% endif %}
+        </br>
+
+        {% if dev_2  == True %}
+        <input name="device_2" type="checkbox" title="Устройство 2" value ="{{dev_2}}" checked > <span> Устройство 2 (снимите галочку для выключения)</span> </br>
+        {% else %}
+        <input name="device_2" type="checkbox" title="Устройство 2" value ="{{dev_2}}" > <span> Устройство 2 (установите галочку для включения)</span> </br>
+        {% endif %}
+        </br>
+        {% if dev_3  == True %}
+        <input name="device_3" type="checkbox" title="Устройство 3" value="{{dev_3}}" checked > <span> Устройство 3 (снимите галочку для выключения) </span></br>
+        {% else %}
+        <input name="device_3" type="checkbox" title="Устройство 3" value="{{dev_3}}" > <span> Устройство 3 (установите галочку для включения) </span></br>
+        {% endif %}
+        </br>
+
+
+        <input id="device_4"  name="device_4" type="checkbox" title="Устройство 4" value="{{dev_4}}" > <span> Устройство 4 (установите галочку для включения / снимите галочку для выключения)</span> </br>
+
+        <hr>
+
+        <!input id="comment" name="comment" type="text" placeholder="Введите комментарий к действию" value="{{comment}}">  Краткое описание действия </br>
+         <textarea name = "text" required placeholder="Введите комментарий к действию" cols="90" rows="4"></textarea><br>
+        </br>
+
+        <hr>
+
+        <input class="btn btn-primary" type="submit" value="Сохранить"> {{msg}}
+
+        <hr>
+    </form>
+
+    </div>
+
+{% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+
+
+
+
+{% endblock %}

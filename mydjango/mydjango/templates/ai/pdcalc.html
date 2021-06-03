@@ -39,15 +39,15 @@
                     {% if request.user.is_superuser %}
                     <li>
                         {% url 'ai:nabobj' as url_nabobj %}
-                        <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты (новая)</a>
+                        <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты</a>
                     </li>
                     <li>
                         {% url 'ai:starter' Mumuka as url_ai_starter %}
-                         <a class = " nav_link {% if url_ai_starter == request.path %}activate{% endif %} " href = "{{url_ai_starter}}"> Мониторинг (новая)</a>
+                         <a class = " nav_link {% if url_ai_starter == request.path %}activate{% endif %} " href = "{{url_ai_starter}}"> Мониторинг</a>
                     </li>
                     <li>
                         {% url 'ai:show' as url_ai_show %}
-                         <a class = " nav_link {% if url_ai_show == request.path %}activate{% endif %} " href = "{{url_ai_show}}"> Телеметрия (новая)</a>
+                         <a class = " nav_link {% if url_ai_show == request.path %}activate{% endif %} " href = "{{url_ai_show}}"> Телеметрия</a>
                     </li>
                     {% endif %}
                     {% endif %}

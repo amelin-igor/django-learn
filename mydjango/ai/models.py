@@ -77,3 +77,22 @@ class Customerrec(models.Model):
     class Meta:
         verbose_name = 'Реквизит'
         verbose_name_plural = 'Реквизиты клиентов'
+
+class my_control(models.Model):
+    user = models.ForeignKey(User, verbose_name= 'Пользователь', on_delete = models.CASCADE)
+    phone = models.CharField ( max_length = 20, verbose_name= 'Номер телефона')
+    dev_1 = models.BooleanField( verbose_name='Устройство 1', default = 0)
+    dev_2 = models.BooleanField(verbose_name='Устройство 2', default=0)
+    dev_3 = models.BooleanField(verbose_name='Устройство 3', default=0)
+    comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
+    identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
+
+    datetime = models.DateTimeField('дата действия')
+
+    def __str__(self):
+        #return 'Управляющее действие: {}'.format(self.user.username)
+        return 'Управляющее действие: {}'.format(self.identificator)
+
+    class Meta:
+        verbose_name = 'Состояние вектора управляения '
+        verbose_name_plural = 'Состояния векторов управляения '

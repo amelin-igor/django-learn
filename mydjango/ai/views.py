@@ -5,13 +5,13 @@ from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.models import Range1d, LinearAxis
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-# from django.http import  HttpResponse
+from django.http import  HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 
-from .models import Metering, Customer, Customerrec, Note
+from .models import Metering, Customer, Customerrec, Note, my_control
 
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
@@ -29,6 +29,11 @@ import uuid
 import os
 from .forms import account_check, get_ident
 from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordChangeDoneView
+#import json
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializers import my_controlSerializer
+import numpy as np
 
 # import numpy as np
 # import pandas as pd
@@ -69,6 +74,7 @@ password = {
         '00011': '2865449762',
         '00012': '159755432',
         '00013': '259755432',
+        '00033': '597554321',
     }
 
 #http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
@@ -90,6 +96,7 @@ def start(request):
             raise Http404("Пользователь отсутствует")
         print("User.is_authenticated")
         print(request.user.is_authenticated)
+        print(request.user.id)
         print(request.user.id)
         print(request.user.first_name)
         print(request.user.last_name)
@@ -118,7 +125,7 @@ def page2(request):
 
 def add(request):
 
-
+    print('add')
     #now = datetime.datetime.now()
     now = timezone.now()
     nameandpaswcorrect = False
@@ -180,13 +187,43 @@ def add(request):
                     'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
                             data + ' / ' + ': Wrong user name!' + '\n')
 
+
+    #print(login)
+    #print(name)
+    #print(mt)
+    #print(t)
+    #print(h)
+    #print(co2)
+    #print(ch4)
+    #print(n2o)
+    #print(now)
+
+
+
+
     m = Metering(meter_identificator = login, meter_title = name, meter_text = mt, meter_temperature = t, meter_humidity = h, meter_CO2 = co2,
                  meter_CH4 = ch4, meter_N2O = n2o, meter_datetime = now )
     m.save()
     #return render(request, 'ai/add.html', {'metering': m})
     #return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
-    return render(request, 'ai/pdstart.html')
+    #return render(request, 'ai/pdstart.html')
 
+    #return JsonResponse({'meter_identificator' : login, 'meter_title' : name, 'meter_text' : mt, 'meter_temperature' : t})
+    #return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
+
+    #request_data = json.loads(request.body.decode('utf-8'))  # This assumes your request body is JSON
+
+    v1 = my_condition_2(request)
+    #json_data = json.dumps(v1)
+    #print(v1)
+    return JsonResponse(v1, safe=False)
+
+    #return Response({"key": "value", "key2": "value2"})
+
+    #a = 'Yes'
+    #b = 'No'
+    # return a
+    #return render(request, 'ai/sms.html', {'reason': a, "sms_sux": b})
 
 def show(request):
     q =  Metering.objects.filter(meter_title ="Mumuka")
@@ -243,10 +280,16 @@ def addcom(request, metering_id):
     return render(request, 'ai/form1.html',{'metter_of_buryonka': q, 'latest_comments_list': latest_comments_list, 'name':'name'})
 
 
-def starter(request, meter_title):
+def starter(request, meter_title, chisizm):
 #def starter(request):
    # Acc = account_check(request)
-    ident = get_ident(request)
+    #ident = get_ident(request)
+
+    voc = get_ident(request)
+    print('voc = ')
+    print(voc)
+    ident = voc['ident']
+
     try:
        q = Metering.objects.filter(meter_title=meter_title, meter_identificator = ident)
        # q = Metering.objects.filter(meter_title=meter_title)
@@ -259,7 +302,7 @@ def starter(request, meter_title):
         y3.append(data.meter_humidity)
     len_all = len(y3)
 
-    latest_data_list = q.order_by('-meter_datetime')[:3000]
+    latest_data_list = q.order_by('-meter_datetime')[:chisizm]
     z = {'metter_of_buryonka': latest_data_list}
 
     #x1 = [1, 10, 35, 27]
@@ -272,19 +315,26 @@ def starter(request, meter_title):
     y2 = []
     y4 = []
     #d = []
+    number = []
+    i = 1
     #format = '%b %d %Y %I:%M%p' # Формат
     format = '%H:%M' # Формат
+
     for data in latest_data_list:
         #d=str(datetime.date(data.meter_datetime))
         x0.append(data.meter_datetime)
         y1.append(data.meter_temperature)
         y2.append(data.meter_humidity)
         y4.append(data.meter_CO2)
+
         #n.append(data.meter_humidity)
+        number.append(i)
+        i = i + 1
 
     name_cow = data.meter_title
     print(name_cow)
 
+    #result =np.column_stack((latest_data_list, number))
 
     if name_cow =='Yarushka':
         nabobj_name = 'Объект 1'
@@ -341,9 +391,11 @@ def starter(request, meter_title):
     script, div = components(myplot_2(request, x1, y10, y20, y40, 'температура, °С', 'влажность, %', name_dop_osi))
     #print(div)
 
+    #
 
-
-    return render(request, 'ai/starter.html', {'script': script, 'div' : div, 'metter_of_buryonka': latest_data_list, 'len_all': len_all,
+    return render(request, 'ai/starter.html', {'script': script, 'div' : div,
+                                               'metter_of_buryonka': latest_data_list,
+                                               'len_all': len_all,
                                                'date_last': date_last,
                                                'date_first': date_first,
                                                't_last':y1_last,
@@ -351,7 +403,10 @@ def starter(request, meter_title):
                                                'CO2_last':y4_last,
                                                'data': data,
                                                'nabobj_name' : nabobj_name,
-                                                'gas_name': gas_name,
+                                               'gas_name': gas_name,
+                                               'name_cow':name_cow,
+                                               'number':number,
+
                                                # 'Acc': Acc
                                                })
 
@@ -382,7 +437,13 @@ def index2(request):
 
 def nabobj(request):
 
-    ident = get_ident(request)
+    #ident = get_ident(request)
+    voc = get_ident(request)
+    print('voc = ')
+    print(voc)
+
+    ident = voc['ident']
+
     print ('nabobj_ident =')
     print (ident)
     #cow_metering_list = Metering.objects.all()
@@ -394,8 +455,17 @@ def nabobj(request):
     y = sorted(list(XM))
     return render(request, 'ai/nabobj.html', {'cow_metering_list': y})
 
-def cows(request, meter_title):
-    return HttpResponseRedirect(reverse('ai:starter', args=(meter_title,)))
+def cows(request, meter_title, chisizm):
+    print('cows ')
+    chisizm_from_post = request.POST.get('chisizm')
+    print('chisizm from POST = ')
+    print(chisizm)
+    print('meter_title = ')
+    print(meter_title)
+    if chisizm_from_post == None:
+        chisizm_from_post = chisizm
+
+    return HttpResponseRedirect(reverse('ai:starter', args=(meter_title, chisizm_from_post)))
 
 def pdstart(request):
     print('pdstart_qqq')
@@ -842,6 +912,7 @@ def pdcalc(request):
         return render(request, 'ai/deposit.html', mes = mes)
     else:
         mod = "model_X20_jpt22"
+        #mod = "model_X51PCZ_37"
         #if regn in bank:
         #    name = bank[regn]
         #else:
@@ -874,11 +945,14 @@ def pdcalc(request):
         print(wayf)
         if not check_file:
             wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'A51.csv'
+            #wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'PCZ69.csv'
             check_file = os.path.exists(wayf)
             print(check_file)
             print(wayf)
+            #cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
+             #       '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
             cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
+                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51' ]
 
             Dat = Dat2
         else:
@@ -892,9 +966,21 @@ def pdcalc(request):
             return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info' : info})
 
         data2 = pd.read_csv(wayf, sep=',')
+        ds2 = data2.shape[1]
+        if ds2 == 56:
+            cols = cols + ['52', '53', '54', '55', '56']
+
+
         X_new1 = data2
 
         X_new1.drop(cols, axis=1, inplace=True)
+        ds2 = data2.shape[0]
+        if ds2 == 69:
+            X_new1 = data2[29:]
+        elif ds2 == 68:
+            X_new1 = data2[29:]
+        else:
+            X_new1 = data2[1:]
 
         print('data2[:5]=')
         print(data2[:5])
@@ -1195,7 +1281,7 @@ def pdcalc(request):
             title = 'Вероятность дефолта банка '+ name,
             plot_width=900,
             tools="pan, box_zoom, reset, save",
-            x_axis_label='номер квартала начиная с 1/07/2010', y_axis_label='Вероятность дефолта'
+            x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
         )
         plot.line(x, y1, legend_label="вероятность дефолта", line_color="red")
         plot.line(x, y2, legend_label="вероятность дефолта фильтр", line_color="blue")
@@ -1257,7 +1343,7 @@ def myplot(request, x, y1, y2, name_y2, b_name):
             title='Вероятность дефолта банка и '+name_y2 + ' банка ' + b_name,
             plot_width=1100,
             tools="pan, box_zoom, reset, save",
-            x_axis_label='номер квартала начиная с 1/07/2010', y_axis_label='Вероятность дефолта'
+            x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
         )
         plot.y_range = Range1d(start=0 - max(y1) * 0.1, end=max(y1) * 1.1)
         print('y2 = ')
@@ -1547,9 +1633,39 @@ def fillrec(request):
     else:
         vid = 0
 
+    X = []
+    Y = []
+    Z = []
+    try:
+        a = Customerrec.objects.filter(identificator = identificator)
+        customer = a.order_by('id')[:]
+        print('customer = ')
+        print(customer)
+        i = 0
+        for cus in customer:
+            X.append(cus.identificator)
+            Y.append(cus.user_id)
+            Z.append(cus.user.username)
+            i = i + 1
+        print('Число комплектов аппаратуры c таким же номером = ')
+        print(i)
+        print('ID пользователя с таким же номером комплекта')
+        print(Y)
+        print('имена пользователей с таким же номером комплекта')
+        print(Z)
+    except:
+        i = 0
+        #raise Http404("Комлект с таким номером отсутствует")
+
+    mist_fild = []
+
+    if i > 0:
+        msg += ' Комлект аппаратуры с таким номером уже зарегистрирован. Регистрация не возможна /'
+        mist_fild.append('true')
+
     if ul_fl == 'true':
 
-        mist_fild = []
+
         if len(client_name) == 0:
             mist_fild.append('true')
             msg += ' введите название организации /'
@@ -1592,11 +1708,6 @@ def fillrec(request):
         else:
             mist_fild.append('false')
 
-        if len(identificator) != 5:
-            msg += ' введите идентификатор аппаратуры (5 знаков)'
-            mist_fild.append('true')
-        else:
-            mist_fild.append('false')
 
         if codeword != codeword_2:
             msg += ' введите кодовое слово'
@@ -1885,3 +1996,242 @@ def remotecontrol(request):
     print("hello!")
 
     return resp
+
+def control(request):
+    print("control")
+    voc = get_ident(request)
+    print('voc = ')
+    print(voc)
+    ident = voc['ident']
+    now = timezone.now()
+
+    dev_1 = []
+    dev_2 = []
+    dev_3 = []
+
+    if request.user.is_authenticated == True:
+        try:
+            a = User.objects.get(id=request.user.id)
+        except:
+            raise Http404("Управляющие воздействия отсутствуют")
+
+    print("User.is_authenticated = ", request.user.is_authenticated)
+    print(request.user.id)
+    print(request.user.first_name)
+    print(request.user.last_name)
+
+    control = a.my_control_set.order_by('id')[:]
+
+    for c in control:
+        dev_1.append(c.dev_1)
+        dev_2.append(c.dev_2)
+        dev_3.append(c.dev_3)
+
+
+
+    if len(dev_1) == 0:
+        dev_1.append("False")
+        dev_2.append("False")
+        dev_3.append("False")
+
+    print('dev_1[-1] = ')
+    print(dev_1[-1])
+
+    if dev_1 == False or dev_1 == None :
+        d1 = 'false'
+    else:
+        d1 = 'true'
+    if dev_2 == False or dev_2 == None :
+        d2 = 'false'
+    else:
+        d2 = 'true'
+    if dev_3 == False or dev_3 == None :
+        d3 = 'false'
+    else:
+        d3 = 'true'
+
+    print("d1 =")
+    print(d1)
+
+    return render(request, 'ai/control.html',
+              {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'user_id': request.user.id,
+               'first_name': request.user.first_name, 'last_name': request.user.last_name})
+
+def control_save(request):
+    print("control_save")
+    voc = get_ident(request)
+    ident = voc['ident']
+    dev_1 = request.POST.get('device_1')
+    print("dev_1 =")
+    print(dev_1)
+
+    dev_2 = request.POST.get('device_2')
+    print("dev_2 =")
+    print(dev_2)
+    dev_3 = request.POST.get('device_3')
+    print("dev_3 =")
+    print(dev_3)
+    #comment = request.POST.get('text')
+    comment = request.POST['text']
+    print('comment = ')
+    print(comment)
+
+    print('user_id = ')
+    print(request.user.id )
+
+    if dev_1 == 'false' or dev_1 == None :
+        d1 = False
+    else:
+        d1 = True
+    if dev_2 == 'false' or dev_2 == None :
+        d2 = False
+    else:
+        d2 = True
+    if dev_3 == 'false' or dev_3 == None :
+        d3 = False
+    else:
+        d3 = True
+
+    print("d1 =")
+    print(d1)
+
+
+    now = timezone.now()
+    m = my_control(user_id=request.user.id, dev_1 = d1, dev_2 = d2, dev_3 = d3, comment=comment, phone = '+7 (495) 777-77-77',
+                 datetime = now, identificator = ident )
+    m.save()
+    acc = account_check(request)
+    return render(request, 'ai/start.html', {'Acc': acc})
+
+
+def my_condition(request):
+    print("my_condition")
+    login = request.GET.get('login')
+    print("login = ")
+    print(login)
+
+    dev_1 = []
+    dev_2 = []
+    dev_3 = []
+
+    try:
+        print("control = ")
+        a = my_control.objects.filter(identificator=login)
+        #print(a)
+    except:
+        raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+
+    control = a.order_by('id')
+
+    for c in control:
+        dev_1.append(c.dev_1)
+        dev_2.append(c.dev_2)
+        dev_3.append(c.dev_3)
+
+    #print ('dev_1[-1] = ')
+    #print(dev_1[-1])
+    #print('dev_2[-1] = ')
+    #print(dev_2[-1])
+    #print('dev_3[-1] = ')
+    #print(dev_3[-1])
+
+
+    if dev_1 == False or dev_1 == None :
+        d1 = 'false'
+    else:
+        d1 = 'true'
+    if dev_2 == False or dev_2 == None :
+        d2 = 'false'
+    else:
+        d2 = 'true'
+    if dev_3 == False or dev_3 == None :
+        d3 = 'false'
+    else:
+        d3 = 'true'
+
+    print("d1 =")
+    print(d1)
+    vocab = {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login}
+    print(vocab)
+    #return ({'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
+    #return render(request, 'ai/start.html', {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
+    return JsonResponse({"key": "value"})
+
+def my_condition_2(request):
+    print("my_condition_2")
+    login = request.GET.get('login')
+    print("login = ")
+    print(login)
+
+    dev_1 = []
+    dev_2 = []
+    dev_3 = []
+
+    try:
+        #print("control = ")
+        a = my_control.objects.filter(identificator=login)
+        #print(a)
+    except:
+        raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+
+    control = a.order_by('id')
+
+    for c in control:
+        dev_1.append(c.dev_1)
+        dev_2.append(c.dev_2)
+        dev_3.append(c.dev_3)
+
+    #print ('dev_1[-1] = ')
+    #print(dev_1[-1])
+    #print('dev_2[-1] = ')
+    #print(dev_2[-1])
+    #print('dev_3[-1] = ')
+    #print(dev_3[-1])
+
+
+    if dev_1[-1] == False or dev_1[-1] == None :
+        d1 = 'fals'
+    else:
+        d1 = 'true'
+    if dev_2[-1] == False or dev_2[-1] == None :
+        d2 = 'fals'
+    else:
+        d2 = 'true'
+    if dev_3[-1] == False or dev_3[-1] == None :
+        d3 = 'fals'
+    else:
+        d3 = 'true'
+
+    vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login}
+    print("my_condition_2.vocab = ")
+    print(vocab)
+    return (vocab)
+
+
+
+class my_controlView(APIView):
+    def get(self, request):
+        print("class my_controlView")
+        login = request.GET.get('login')
+        print("login = ")
+        print(login)
+        #my_co = my_control.objects.all()
+
+        try:
+            print("control = ")
+            a = my_control.objects.filter(identificator=login)
+            #print("a = ")
+            #print(a)
+            my_co = a.order_by('id')
+            #print("my_co = ")
+            #print(my_co)
+        except:
+            #raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+            return Response({"my_control": "No data"})
+
+        if len(my_co) != 0:
+            serializer = my_controlSerializer(my_co, many=True)
+            #print(serializer.data[-1])
+            return Response({"my_control": serializer.data[-1]})
+        else:
+            return Response({"my_control": "No data"})

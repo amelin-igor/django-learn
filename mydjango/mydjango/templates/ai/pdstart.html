@@ -20,7 +20,8 @@
 
         {% csrf_token %}
         <input type="text" required placeholder="Введите номер лицензии" name = "name"><br>
-        <button type="submit">Выполнить расчет PD</button>
+
+        <input class="btn btn-primary" type="submit" value="Выполнить расчет PD">
     </form>
 {% else %}
        Для продолжения требуется авторизация

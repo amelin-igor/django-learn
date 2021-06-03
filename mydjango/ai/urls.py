@@ -13,9 +13,9 @@ urlpatterns = [
     path('page2/', views.page2, name='page2'),
     path('graph1/', views.graph1, name='graph1'),
     path('graph2/', views.graph2, name='graph2'),
-    path('starter/<str:meter_title>/', views.starter, name='starter'),
+    path('starter/<str:meter_title>/<int:chisizm>', views.starter, name='starter'),
     #path('starter/', views.starter, name='starter'),
-    path('cows/<str:meter_title>/', views.cows, name='cows_page'),
+    path('cows/<str:meter_title>/<int:chisizm>', views.cows, name='cows_page'),
     path('addcom/', views.index2, name='index2'),
     path('addcom/<int:metering_id>/', views.addcom, name='addcom'),
     path('addcom/<int:metering_id>/leave_comment2/', views.leave_comment2, name='leave_comment2'),
@@ -46,5 +46,10 @@ urlpatterns = [
 
     path('password-change/', views.MyPasswordChangeView.as_view(), name='password_change'),
     path('password-change/done/', views.MyPasswordChangeDoneView.as_view(), name='password_change_done'),
+    path('control/', views.control, name='control_page'),
+    path('control_save/', views.control_save, name='control_save_page'),
+    path('my_condition/', views.my_condition, name='my_condition_page'),
+    path('my_control/', views.my_controlView.as_view(), name='my_control_page'),
+
 ]
 

@@ -7,13 +7,15 @@
   {% if cow_metering_list %}
         {% for a in cow_metering_list %}
 
-              <a href="{% url 'ai:cows_page' a %}">{{a}}</a>
+              <a href="{% url 'ai:cows_page' a 1000 %}">{{a}}</a>
               <br />
 
         {% endfor %}
    {% else %}
      Объекты отсутствуют
    {% endif %}
+
+
 
 {% endblock %}
 

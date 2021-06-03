@@ -29,8 +29,8 @@
 
 {{script|safe}}
 
-            </td>
-            <td>
+          </td>
+          <td>
                 <ul>
                     <li>
                          {% url 'webex:detal' 1 as url_webex_detal %}
@@ -70,10 +70,25 @@
                          {% url 'ai:pdstart' as url_pdstart %}
                         <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_pdstart}}"> Определение вероятности дефолта банка </a>
                     </li>
-                </ul>
 
-            </td>
 
+                        {% if request.user.is_authenticated %}
+
+                          <form action = "{% url 'ai:cows_page' name_cow 1000 %}" method = "POST">
+                            {% csrf_token %}
+
+                             <input id="chisizm" name="chisizm" type="text" placeholder="Число измерений" value="{{chisizm}}">   </br>
+                            <!<button type="submit"> <!Пополнить баланс<!</button>
+                            <input class="btn btn-primary" type="submit" value="Отобразить">
+                          </form>
+                         {% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+                    </ul>
+
+                </td>
         </tr>
 
     </table>

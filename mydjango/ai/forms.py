@@ -154,6 +154,7 @@ def account_check(request):
 
 
 def get_ident(request):
+    i = 0
     print('get_ident ...')
     if request.user.is_superuser:
         ident = '00001'
@@ -163,15 +164,22 @@ def get_ident(request):
         X = []
         try:
             a = User.objects.get(id=request.user.id)
+            print('request.user.id = ')
+            print(request.user.id)
         except:
             raise Http404("Пользователь отсутствует")
 
-        customer = a.customerrec_set.order_by('id')[:]
+        customer = a.customerrec_set.order_by('user_id')[:]
         print('customer = ')
         print(customer)
 
+        i=0
         for cus in customer:
             X.append(cus.identificator)
+            i = i + 1
+
+        print('Число комплектов аппаратуры c таким же номером = ')
+        print(i)
 
         if len(X) == '':
             X.append("0")
@@ -180,4 +188,4 @@ def get_ident(request):
         print ('my_ident = ')
         print(ident)
 
-    return (ident)
+    return ({'ident': ident, 'i': i})
