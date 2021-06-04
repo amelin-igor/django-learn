@@ -5,7 +5,7 @@
 {% block content %}
 
     <h2>{{article.article_title}} </h2>
-
+ <hr>
     {% if par %}
         {% for x in par %}
                 <p>{{x}}</p>
@@ -15,10 +15,10 @@
         Параграфы не найдены.
     {% endif %}
 
-    <em>{{article.pub_date}}</em>
+    <em><!{{article.pub_date}}</em>
 
     {% if article.was_published_recently %}
-    НОВАЯ СТАТЬЯ!
+    <!НОВАЯ СТАТЬЯ!
     {% endif %}
 
     <hr>
@@ -31,7 +31,7 @@
         {% endfor %}
 
     {% else %}
-        Комментарии не найдены. Вы можете добавить комментарии.
+        <! Комментарии не найдены. Вы можете добавить комментарии.
     {% endif %}
 
     <hr>
@@ -45,11 +45,13 @@
 
                    <textarea name = "text" required placeholder="Текст комментария" cols="30" rows="10"></textarea><br>
         <hr>
-        Нажмите здесь, чтобы <button type="submit">Оставить комментарий</button>
+        Нажмите здесь, чтобы <button type="submit">оставить комментарий</button>
 
     </form>
 
 {% else %}
+
+ <hr>
     Авторизуйтесь, чтобы оставить Ваш комментарий
      <hr>
     <hr>

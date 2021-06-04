@@ -156,7 +156,7 @@ def account_check(request):
 def get_ident(request):
     i = 0
     print('get_ident ...')
-    if request.user.is_superuser:
+    if request.user.is_superuser or not request.user.is_authenticated:
         ident = '00001'
         print('If is_superuser  ...')
     else:

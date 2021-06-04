@@ -48,7 +48,7 @@
             <td
                 colspan="2" style="background-color:#3399FF;">
                 <!<p style=color:white > <!Соберем для Вас все, что Вы не знали о своем предприятии..., но не хотели бы не знать ... <!</p>
-                <p style=color:white > Цифровые технологии по сбору, хранению и обработке информации для предприятий ... </p>
+                <p style=color:white > Цифровые технологии по сбору, хранению, обработке и анализу информации </p>
 
             </td>
         </tr>
@@ -71,12 +71,15 @@
                  <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Банкам</a>
                     <div class="dropdown-menu">
+                        {% url 'webex:detal' 8 as url_webex_detal_8 %}
+                        {% url 'webex:detal' 9 as url_webex_detal_9 %}
                         {% url 'ai:pdstart' as url_pdstart %}
-                        <a class="dropdown-item" href="{{url_pdstart}}">Вероятность дефолта банка</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <a class="dropdown-item" href="{{url_pdstart}}">Модуль определения вероятности дефолта банка</a>
+                        <a class="dropdown-item" href="#"><! Another action</a>
+                        <a class="dropdown-item" href="#"><!Something else here</a>
                     <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Separated link</a>
+                        <a class="dropdown-item" href="{{url_webex_detal_8}}">Анализ финансового положения банка</a>
+                        <a class="dropdown-item" href="{{url_webex_detal_9}}">Программа анализа финансовой деятельности банка "Аналитик"</a>
                     </div>
                  </li>
 
@@ -86,30 +89,34 @@
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Услуги</a>
                     <div class="dropdown-menu">
                         {% url 'ai:pdstart' as url_pdstart %}
-                        <a class="dropdown-item" href="{{url_webex_detal}}">Услуги </a>
+                        <a class="dropdown-item" href="{{url_webex_detal}}">Сопровождение внедренных систем </a>
                         {% url 'ai:sendsms' as url_sendsms %}
-                        <a class="dropdown-item" href="{{url_sendsms}}">Отправить СМС </a>
-                        <a class="dropdown-item" href="#">Something else here</a>
+                        <a class="dropdown-item" href="{{url_sendsms}}"><!Отправить СМС </a>
+                        <a class="dropdown-item" href="#">Внедрение спроектированных систем</a>
                     <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Separated link</a>
+                        <a class="dropdown-item" href="#">Внедрение аналитических систем</a>
                     </div>
                  </li>
                  <li class="nav-item">
 
-                    {% url 'webex:detal' 2 as url_webex_detal %}
+
+
+                     {% url 'webex:detal' 2 as url_webex_detal %}
                      {% url 'webex:smarp_page' as url_webex_detal_smarp_page %}
-                    <!<a class = " nav-link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> <!Пректирование</a>
-                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Пректирование</a>
+                     {% url 'ai:nabobj' as url_nabobj %}
+                    <!<a class = " nav-link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> <!Проектирование</a>
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Проектирование</a>
                     <div class="dropdown-menu">
                         {% url 'ai:pdstart' as url_pdstart %}
                         <a class="dropdown-item" href="{{url_webex_detal}}">Диспетчер технологических процессов </a>
-                        <a class="dropdown-item" href="#">Накопление и анализ больших данных</a>
-                        <a class="dropdown-item" href="#">Искусственный интеллект (AI)</a>
+                        <a class="dropdown-item" href="#"><!Накопление и анализ больших данных</a>
+                        <a class="dropdown-item" href="#"><!Искусственный интеллект (AI)</a>
                     <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Интернет вещей (IoT)</a>
-                        <a class="dropdown-item" href="#">Мониторинг состояния окружающей среды</a>
-                        <a class="dropdown-item" href="{{url_webex_detal_smarp_page}}">Мониторинг противопожарной безопасности</a>
-                        <a class="dropdown-item" href="{% static 'smarp.pdf' %}">СМАРП</a>
+                        <a class="dropdown-item" href="#"><!Интернет вещей (IoT)</a>
+                        <a class="dropdown-item" href="{{url_nabobj}}">Пример системы мониторинга состояния наблюдаемых объектов</Пример> </a>
+                        <a class="dropdown-item" href="{{url_webex_detal_smarp_page}}"><!Мониторинг противопожарной безопасности</a>
+                        <a class="dropdown-item" href="{% static 'smarp.pdf' %}">Система мониторинга и анализа распределенных параметров СМАРП</a>
+
 
                     </div>
                  </li>

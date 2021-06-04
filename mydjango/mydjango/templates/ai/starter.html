@@ -32,28 +32,14 @@
           </td>
           <td>
                 <ul>
-                    <li>
-                         {% url 'webex:detal' 1 as url_webex_detal %}
-                          <a class = " nav_link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> Промышленность</a>
-                     </li>
-                    <li>
-                          {% url 'webex:detal' 4 as url_webex_detal %}
-                          <a class = " nav_link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> Сельское хозяйство</a>
-                    </li>
-                    <li>
-                          {% url 'webex:detal' 3 as url_webex_detal %}
-                          <a class = " nav_link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> Торговля</a>
-                    </li>
-                    <li>
-                        {% url 'webex:detal' 4 as url_webex_detal %}
-                          <a class = " nav_link {% if url_webex_detal == request.path %}activate{% endif %} " href = "{{url_webex_detal}}"> Животноводство</a>
-                    </li>
-                    {% if request.user.is_authenticated %}
+
+
 
                     <li>
                         {% url 'ai:nabobj' as url_nabobj %}
                         <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты</a>
                     </li>
+
                     {% if request.user.is_superuser %}
                     <li>
                         {% url 'ai:starter' Mumuka as url_ai_starter %}
@@ -64,15 +50,11 @@
                          <a class = " nav_link {% if url_ai_show == request.path %}activate{% endif %} " href = "{{url_ai_show}}"> Телеметрия</a>
                     </li>
                     {% endif %}
-                    {% endif %}
-
-                    <li>
-                         {% url 'ai:pdstart' as url_pdstart %}
-                        <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_pdstart}}"> Определение вероятности дефолта банка </a>
-                    </li>
 
 
-                        {% if request.user.is_authenticated %}
+
+
+                        <hr>
 
                           <form action = "{% url 'ai:cows_page' name_cow 1000 %}" method = "POST">
                             {% csrf_token %}
@@ -81,9 +63,7 @@
                             <!<button type="submit"> <!Пополнить баланс<!</button>
                             <input class="btn btn-primary" type="submit" value="Отобразить">
                           </form>
-                         {% else %}
-       Для продолжения требуется авторизация
-{% endif %}
+
 
 
                     </ul>
