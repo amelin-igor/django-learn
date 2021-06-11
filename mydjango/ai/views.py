@@ -34,6 +34,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import my_controlSerializer
 import numpy as np
+from bokeh.layouts import gridplot
 
 # import numpy as np
 # import pandas as pd
@@ -281,7 +282,7 @@ def addcom(request, metering_id):
 
 
 def starter(request, meter_title, chisizm):
-    from bokeh.layouts import gridplot
+
 #def starter(request):
    # Acc = account_check(request)
     #ident = get_ident(request)
@@ -393,73 +394,48 @@ def starter(request, meter_title, chisizm):
     #print(div)
     #x = np.concatenate((y40, y10, y20))
     #y = np.concatenate((y10, y20, y40))
+
     x = y20
     y = y40
-
-    TOOLS="pan,wheel_zoom,box_select,lasso_select,reset"
-    p = figure(tools=TOOLS, width=900, height=600, min_border=10, min_border_left=50,
-               toolbar_location="above",
-               x_axis_label='Влажность, %', y_axis_label='Концентрация, ppm',
-               title="Взаимное распределение влажности и концентрации c гистограммами")
-    p.background_fill_color = "#fafafa"
-    r = p.scatter(x, y, size=3, color="#3A5785", alpha=0.6)
-
-    # create the horizontal histogram
-    hhist, hedges = np.histogram(x, bins=20)
-    hzeros = np.zeros(len(hedges)-1)
-    hmax = max(hhist)*1.1
-    LINE_ARGS = dict(color="#3A5785", line_color=None)
-    ph = figure(toolbar_location=None, width=p.width, height=200, x_range=p.x_range,
-                y_range=(-hmax, hmax), min_border=10, min_border_left=50, y_axis_location="right")
-    ph.xgrid.grid_line_color = None
-    ph.yaxis.major_label_orientation = np.pi / 4
-    ph.background_fill_color = "#fafafa"
-
-    ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
-    hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **LINE_ARGS)
-    hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **LINE_ARGS)
-
-    # create the vertical histogram
-    vhist, vedges = np.histogram(y, bins=20)
-    vzeros = np.zeros(len(vedges) - 1)
-    vmax = max(vhist) * 1.1
-
-    pv = figure(toolbar_location=None, width=200, height=p.height, x_range=(-vmax, vmax),
-                y_range=p.y_range, min_border=10, y_axis_location="right")
-    pv.ygrid.grid_line_color = None
-    pv.xaxis.major_label_orientation = np.pi / 4
-    pv.background_fill_color = "#fafafa"
-
-    pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vhist, color="white", line_color="#3A5785")
-    vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **LINE_ARGS)
-    vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **LINE_ARGS)
-
-
-    layout = gridplot([[p, pv], [ph, None]], merge_tools=False)
-
-    #curdoc().add_root(layout)
-    #curdoc().title = "Selection Histogram"
-
-
+    x_axis = 'Влажность, %'
+    y_axis = 'Концентрация, ppm'
+    title = "Взаимное распределение влажности и концентрации газа c гистограммами"
+    layout = my_layout(x, y, x_axis, y_axis, title)
     script2, div2 = components(layout)
 
+    x = y10
+    y = y20
+    x_axis = 'Температура, С'
+    y_axis = 'Влажность, %'
+    title = "Взаимное распределение температуры и влажности c гистограммами"
+    layout = my_layout(x, y, x_axis, y_axis, title)
+    script3, div3 = components(layout)
+
+    x = y10
+    y = y40
+    x_axis = 'Температура, С'
+    y_axis ='Концентрация, ppm'
+    title = "Взаимное распределение температуры и и концентрации газа c гистограммами"
+    layout = my_layout(x, y, x_axis, y_axis, title)
+    script4, div4 = components(layout)
 
 
 
 
 
-    p2 = figure(
-    plot_width=900,
-    tools = "pan, box_zoom, reset, save",
-    x_axis_label='номер измерения', y_axis_label='температура'
-    )
+    #p2 = figure(
+    #plot_width=900,
+    #tools = "pan, box_zoom, reset, save",
+    #x_axis_label='номер измерения', y_axis_label='температура'
+    #)
     #p2.line (x1, y10, legend_label = "температура, С", line_color="red")
-    p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
-    script3, div3 = components(p2)
+    #p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
+    #script3, div3 = components(p2)
 
     return render(request, 'ai/starter.html', {'script': script, 'div' : div,
-                                                'script2': script2, 'div2' : div2,
-                                               # 'script3': script3, 'div3' : div3,
+                                               'script2': script2, 'div2' : div2,
+                                               'script3': script3, 'div3' : div3,
+                                               'script4': script4, 'div4' : div4,
                                                'metter_of_buryonka': latest_data_list,
                                                'len_all': len_all,
                                                'date_last': date_last,
@@ -2301,3 +2277,49 @@ class my_controlView(APIView):
             return Response({"my_control": serializer.data[-1]})
         else:
             return Response({"my_control": "No data"})
+
+
+def my_layout(x,y, x_axis, y_axis, title_name):
+
+    TOOLS="pan,wheel_zoom,box_select,lasso_select,reset"
+    p = figure(tools=TOOLS, width=900, height=600, min_border=10, min_border_left=50,
+               toolbar_location="above",
+               x_axis_label=x_axis, y_axis_label= y_axis,
+               title=title_name)
+    p.background_fill_color = "#fafafa"
+    r = p.scatter(x, y, size=3, color="#3A5785", alpha=0.6)
+
+    # create the horizontal histogram
+    hhist, hedges = np.histogram(x, bins=20)
+    hzeros = np.zeros(len(hedges)-1)
+    hmax = max(hhist)*1.1
+    LINE_ARGS = dict(color="#3A5785", line_color=None)
+    ph = figure(toolbar_location=None, width=p.width, height=250, x_range=p.x_range,
+                y_range=(-hmax, hmax), min_border=10, min_border_left=50, y_axis_location="right")
+    ph.xgrid.grid_line_color = None
+    ph.yaxis.major_label_orientation = np.pi / 4
+    ph.background_fill_color = "#fafafa"
+
+    ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hhist, color="white", line_color="#3A5785")
+    hh1 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.5, **LINE_ARGS)
+    hh2 = ph.quad(bottom=0, left=hedges[:-1], right=hedges[1:], top=hzeros, alpha=0.1, **LINE_ARGS)
+
+    # create the vertical histogram
+    vhist, vedges = np.histogram(y, bins=20)
+    vzeros = np.zeros(len(vedges) - 1)
+    vmax = max(vhist) * 1.1
+
+    pv = figure(toolbar_location=None, width=250, height=p.height, x_range=(-vmax, vmax),
+                y_range=p.y_range, min_border=10, y_axis_location="right")
+    pv.ygrid.grid_line_color = None
+    pv.xaxis.major_label_orientation = np.pi / 4
+    pv.background_fill_color = "#fafafa"
+
+    pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vhist, color="white", line_color="#3A5785")
+    vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **LINE_ARGS)
+    vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **LINE_ARGS)
+
+
+    layout = gridplot([[p, pv], [ph, None]], merge_tools=False)
+    return layout
+
