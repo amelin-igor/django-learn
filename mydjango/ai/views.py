@@ -344,6 +344,9 @@ def starter(request, meter_title, chisizm):
     elif name_cow =='Mumuka':
         nabobj_name = 'Объект 2'
         gas_name = 'CO2'
+    elif name_cow == 'Francheska':
+        nabobj_name = 'Объект 3'
+        gas_name = 'LPG'
     elif name_cow =='Buryonka':
         nabobj_name = 'Объект 4'
         gas_name = 'Smoke gas'
@@ -399,7 +402,7 @@ def starter(request, meter_title, chisizm):
     y = y40
     x_axis = 'Влажность, %'
     y_axis = 'Концентрация, ppm'
-    title = "Взаимное распределение влажности и концентрации газа c гистограммами"
+    title = "Распределение влажности и концентрации газа"
     layout = my_layout(x, y, x_axis, y_axis, title)
     script2, div2 = components(layout)
 
@@ -407,7 +410,7 @@ def starter(request, meter_title, chisizm):
     y = y20
     x_axis = 'Температура, С'
     y_axis = 'Влажность, %'
-    title = "Взаимное распределение температуры и влажности c гистограммами"
+    title = "Распределение температуры и влажности"
     layout = my_layout(x, y, x_axis, y_axis, title)
     script3, div3 = components(layout)
 
@@ -415,13 +418,9 @@ def starter(request, meter_title, chisizm):
     y = y40
     x_axis = 'Температура, С'
     y_axis ='Концентрация, ppm'
-    title = "Взаимное распределение температуры и и концентрации газа c гистограммами"
+    title = "Распределение температуры и и концентрации газа"
     layout = my_layout(x, y, x_axis, y_axis, title)
     script4, div4 = components(layout)
-
-
-
-
 
     #p2 = figure(
     #plot_width=900,
@@ -431,6 +430,61 @@ def starter(request, meter_title, chisizm):
     #p2.line (x1, y10, legend_label = "температура, С", line_color="red")
     #p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
     #script3, div3 = components(p2)
+
+
+    t_median = np.median(y10)
+    print("t_median =")
+    print(t_median)
+    t_mean = np.mean(y10)
+    print("t_mean =")
+    print(t_mean)
+    t_std = np.std(y10)
+    print("t_std =")
+    print(t_std)
+
+    h_median = np.median(y20)
+    print("h_median =")
+    print(h_median)
+    h_mean = np.mean(y20)
+    print("h_mean =")
+    print(h_mean)
+    h_std = np.std(y20)
+    print("h_std =")
+    print(h_std)
+
+    g_median = np.median(y40)
+    print("g_median =")
+    print(g_median)
+    g_mean = np.mean(y40)
+    print("g_mean =")
+    print(g_mean)
+    g_std = np.std(y40)
+    print("g_std =")
+    print(g_std)
+
+    t_mean = toFixed(t_mean, 2)
+    t_std = toFixed(t_std, 2)
+    h_mean = toFixed(h_mean, 2)
+    h_std = toFixed(h_std, 2)
+    g_mean = toFixed(g_mean, 2)
+    g_std = toFixed(g_std, 2)
+
+
+    corr_t_h = np.corrcoef(y10, y20)[1,0]
+    corr_t_h = toFixed(corr_t_h, 4)
+    print("corr_t_h =")
+    print(corr_t_h)
+    corr_t_g = np.corrcoef(y10, y40)[1,0]
+    corr_t_g = toFixed(corr_t_g, 4)
+    print("corr_t_g =")
+    print(corr_t_g)
+    corr_h_g = np.corrcoef(y20, y40)[1,0]
+    corr_h_g = toFixed(corr_h_g, 4)
+    print("corr_h_g =")
+    print(corr_h_g)
+    corr_t_h_g = np.corrcoef([y10, y20, y40])
+    print("corr_t_h_g =")
+    print(corr_t_h_g)
 
     return render(request, 'ai/starter.html', {'script': script, 'div' : div,
                                                'script2': script2, 'div2' : div2,
@@ -448,6 +502,19 @@ def starter(request, meter_title, chisizm):
                                                'gas_name': gas_name,
                                                'name_cow':name_cow,
                                                'number':number,
+                                               't_median':t_median,
+                                               't_mean':t_mean,
+                                               't_std':t_std,
+                                               'h_median':h_median,
+                                               'h_mean':h_mean,
+                                               'h_std':h_std,
+                                               'g_median':g_median,
+                                               'g_mean':g_mean,
+                                               'g_std':g_std,
+                                               'corr_t_h': corr_t_h,
+                                               'corr_t_g': corr_t_g,
+                                               'corr_h_g': corr_h_g,
+                                               'corr_t_h_g': corr_t_h_g,
 
                                                # 'Acc': Acc
                                                })
@@ -2200,6 +2267,8 @@ def my_condition(request):
     return JsonResponse({"key": "value"})
 
 def my_condition_2(request):
+    # возникает ошибка, если управляющий вектор не задан. Например при первом использовании нового комплекта аппаратуры
+    # нужно это предусмотреть
     print("my_condition_2")
     login = request.GET.get('login')
     print("login = ")

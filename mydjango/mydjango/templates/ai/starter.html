@@ -12,7 +12,7 @@
 <table width="1150" border="0">
         <tr>
              <td>
-                Данные телеметрии c {{date_first}} по {{date_last}} | {{nabobj_name}} </br>
+                Данные телеметрии c {{date_first}} по {{date_last}} (UTC) | {{nabobj_name}} </br>
                 Температура {{t_last}}<sup>o</sup> |
                 Влажность  {{h_last}}% |
                 Концентрация {{gas_name}}  {{CO2_last}} ppm |
@@ -75,18 +75,58 @@
 
 <hr>
 
+<b>влажность(h) </b> </br>
+медианная : {{h_median}}%  </br>
+средняя   : {{h_mean}}% </br>
+стд. откл.: {{h_std}}% </br>
 
+<b>концентрация газа(g)</b> </br>
+медианная : {{g_median}} ppm  </br>
+средняя   : {{g_mean}} ppm </br>
+стд. откл.: {{g_std}} ppm </br>
 
+<b>коэффициент корреляции (h, g) = {{corr_h_g}}</b> </br>
+<hr>
 
 {{div2| safe}}
 {{script2| safe}}
+<hr>
+<b>температура(t) </b></br>
+медианная : {{t_median}}<sup>o</sup>С  </br>
+средняя   : {{t_mean}}<sup>o</sup>С </br>
+стд. откл.: {{t_std}}<sup>o</sup>С </br>
+
+<b>влажность(h) </b> </br>
+медианная : {{h_median}}%  </br>
+средняя   : {{h_mean}}% </br>
+стд. откл.: {{h_std}}% </br>
+<b>коэффициент корреляции (t, h) = {{corr_t_h}}</b> </br>
 
 <hr>
+
 {{div3| safe}}
 {{script3| safe}}
 <hr>
+
+<b>температура(t) </b></br>
+медианная : {{t_median}}<sup>o</sup>С  </br>
+средняя   : {{t_mean}}<sup>o</sup>С </br>
+стд. откл.: {{t_std}}<sup>o</sup>С </br>
+
+<b>концентрация газа(g)</b> </br>
+медианная : {{g_median}} ppm  </br>
+средняя   : {{g_mean}} ppm </br>
+стд. откл.: {{g_std}} ppm </br>
+<b>коэффициент корреляции (t, g) = {{corr_t_g}}</b> </br>
+
+<hr>
+
 {{div4| safe}}
 {{script4| safe}}
+<hr>
+
+<b>матрица корреляции(t, h, g) = {{corr_t_h_g}}</b> </br>
+
 
 <hr>
   {{latest_data_list.meter_title}}
