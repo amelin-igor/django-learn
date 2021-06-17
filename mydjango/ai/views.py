@@ -35,6 +35,15 @@ from rest_framework.views import APIView
 from .serializers import my_controlSerializer
 import numpy as np
 from bokeh.layouts import gridplot
+from scipy.cluster.hierarchy import *
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+
+from io import BytesIO
+import base64
 
 # import numpy as np
 # import pandas as pd
@@ -282,8 +291,10 @@ def addcom(request, metering_id):
 
 
 def starter(request, meter_title, chisizm):
+    from sklearn import preprocessing
+    from scipy.spatial.distance import pdist
 
-#def starter(request):
+    from sklearn.cluster import KMeans
    # Acc = account_check(request)
     #ident = get_ident(request)
 
@@ -422,74 +433,90 @@ def starter(request, meter_title, chisizm):
     layout = my_layout(x, y, x_axis, y_axis, title)
     script4, div4 = components(layout)
 
-    #p2 = figure(
-    #plot_width=900,
-    #tools = "pan, box_zoom, reset, save",
-    #x_axis_label='номер измерения', y_axis_label='температура'
-    #)
-    #p2.line (x1, y10, legend_label = "температура, С", line_color="red")
-    #p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
-    #script3, div3 = components(p2)
-
-
     t_median = np.median(y10)
-    print("t_median =")
-    print(t_median)
     t_mean = np.mean(y10)
-    print("t_mean =")
-    print(t_mean)
     t_std = np.std(y10)
-    print("t_std =")
-    print(t_std)
-
     h_median = np.median(y20)
-    print("h_median =")
-    print(h_median)
     h_mean = np.mean(y20)
-    print("h_mean =")
-    print(h_mean)
     h_std = np.std(y20)
-    print("h_std =")
-    print(h_std)
-
     g_median = np.median(y40)
-    print("g_median =")
-    print(g_median)
     g_mean = np.mean(y40)
-    print("g_mean =")
-    print(g_mean)
     g_std = np.std(y40)
-    print("g_std =")
-    print(g_std)
-
     t_mean = toFixed(t_mean, 2)
     t_std = toFixed(t_std, 2)
     h_mean = toFixed(h_mean, 2)
     h_std = toFixed(h_std, 2)
     g_mean = toFixed(g_mean, 2)
     g_std = toFixed(g_std, 2)
-
-
     corr_t_h = np.corrcoef(y10, y20)[1,0]
     corr_t_h = toFixed(corr_t_h, 4)
-    print("corr_t_h =")
-    print(corr_t_h)
     corr_t_g = np.corrcoef(y10, y40)[1,0]
     corr_t_g = toFixed(corr_t_g, 4)
-    print("corr_t_g =")
-    print(corr_t_g)
     corr_h_g = np.corrcoef(y20, y40)[1,0]
     corr_h_g = toFixed(corr_h_g, 4)
-    print("corr_h_g =")
-    print(corr_h_g)
     corr_t_h_g = np.corrcoef([y10, y20, y40])
-    print("corr_t_h_g =")
-    print(corr_t_h_g)
+
+    data_for_clust =np.column_stack((y10, y20, y40))
+    dataNorm = preprocessing.scale(data_for_clust)
+    # вычислим растояние между каждым набором данных
+    data_dist = pdist(dataNorm, 'euclidean')
+    # иерархическая кластеризация
+    data_linkage = linkage(data_dist, method='average')
+    # Метод локтя - определяем опттим колич сегментов
+    # Показывает сумму внутри групповых вариаций
+    last = data_linkage[-10:, 2]
+    print('last=')
+    print(last)
+    last_rev = last[::-1]
+    idxs = np.arange(1, len(last) + 1)
+    #plt.plot(idxs, last_rev)
+    acceleration = np.diff(last, 2)
+    acceleration_rev = acceleration[::-1]
+    #plt.plot(idxs[:-2] + 1, acceleration_rev)
+    #plt.show()
+    clusters = acceleration_rev.argmax() + 2
+    print('clusters:', clusters)
+
+    p5 = figure(
+    plot_width=900,
+    tools = "pan, box_zoom, reset, save",
+    x_axis_label='', y_axis_label='расстояние между измерениями',
+    title="Метод локтя - определяем опттимальное количество сегментов"
+    )
+    p5.line (idxs, last_rev, legend_label = "расстояние", line_color="red")
+    p5.line(idxs[:-2]+1,acceleration_rev, legend_label="2-я производная (ускорение)", line_color="blue")
+    # p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
+    script5, div5 = components(p5)
+
+    nClaster = 5
+
+    graphic = fancy_dendrogram(
+        data_linkage,
+        truncate_mode='lastp',
+        p=nClaster,
+        leaf_rotation=90.,
+        leaf_font_size=12.,
+        show_contracted=True,
+        annotate_above=10,
+    )
+    #plt.show
+
+    #canvas = fig.canvas
+    #buf, size = canvas.print_to_buffer()
+    #image = PIL.Image.frombuffer('RGBA', size, buf, 'raw', 'RGBA', 0, 1)
+    #buffer = io.BytesIO()
+    #image.save(buffer, 'PNG')
+    #graphic = buffer.getvalue()
+    #graphic = base64.b64encode(graphic)
+    #buffer.close()
+
+
 
     return render(request, 'ai/starter.html', {'script': script, 'div' : div,
                                                'script2': script2, 'div2' : div2,
                                                'script3': script3, 'div3' : div3,
                                                'script4': script4, 'div4' : div4,
+                                               'script5': script5, 'div5': div5,
                                                'metter_of_buryonka': latest_data_list,
                                                'len_all': len_all,
                                                'date_last': date_last,
@@ -515,7 +542,8 @@ def starter(request, meter_title, chisizm):
                                                'corr_t_g': corr_t_g,
                                                'corr_h_g': corr_h_g,
                                                'corr_t_h_g': corr_t_h_g,
-
+                                               'clusters' : clusters,
+                                               'graphic': graphic
                                                # 'Acc': Acc
                                                })
 
@@ -2392,3 +2420,43 @@ def my_layout(x,y, x_axis, y_axis, title_name):
     layout = gridplot([[p, pv], [ph, None]], merge_tools=False)
     return layout
 
+
+def fancy_dendrogram(*args, **kwargs):
+    max_d = kwargs.pop('max_d', None)
+    if max_d and 'colod_threshold' not in kwargs:
+        kwargs['colod_threshold'] = max_d
+    annotate_above = kwargs.pop('annotate_above', 0)
+
+    ddata = dendrogram(*args, **kwargs)
+
+    if not kwargs.get('no_plot', False):
+        #fig = plt.figure(figsize=(10, 8)) # после того как убрал это оператор стало выводиться дерево (дендрограмма), до этого выводилась только рамка
+        #fig = plt.figure()
+        #ax = fig.add_subplot(111)
+        plt.title('Дендрограмма')
+        plt.xlabel('sample index or (clastr size)')
+        plt.ylabel('distance')
+        for i, d, c in zip(ddata['icoord'], ddata['dcoord'], ddata['color_list']):
+            x = 0.5 * sum(i[1:3])
+            y = d[1]
+            if y > annotate_above:
+                plt.plot(x, y, 'o', c=c)
+            plt.annotate("%.3g" % y, (x, y), xytext=(0, -5),
+                             textcoords='offset points',
+                             va='top', ha='center')
+
+        if max_d:
+            plt.axhline(y=max_d, c='k')
+
+    #plt.tight_layout()
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+    plt.close()
+
+    graphic = base64.b64encode(image_png)
+    graphic = graphic.decode('utf-8')
+
+    return graphic
