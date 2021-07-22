@@ -47,6 +47,8 @@ from django.contrib.auth import get_user_model
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
+from datetime import datetime, timedelta
+
 matplotlib.use('Agg')
 
 # import numpy as np
@@ -302,16 +304,23 @@ def starter(request, meter_title, chisizm):
     from sklearn.cluster import KMeans
     # Acc = account_check(request)
     # ident = get_ident(request)
-
+    now = timezone.now()
     voc = get_ident(request)
     print('voc = ')
     print(voc)
     ident = voc['ident']
 
+
+    print(now)
+
+    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=183)).delete()
+    now = timezone.now()
+    print(now)
+
     try:
         q = Metering.objects.filter(meter_title=meter_title, meter_identificator=ident)
-        # q = Metering.objects.filter(meter_title=meter_title)
-        # Yarushka
+        now = timezone.now()
+        print(now)
     except:
         raise Http404("Нет запрашиваемых данных")
     y3 = []
@@ -319,9 +328,17 @@ def starter(request, meter_title, chisizm):
     for data in q:
         y3.append(data.meter_humidity)
     len_all = len(y3)
+    print('len_all=')
+    print(len_all)
+
+
+
+
 
     latest_data_list = q.order_by('-meter_datetime')[:chisizm]
     z = {'metter_of_buryonka': latest_data_list}
+    # print('latest_data_list =')
+    # print(latest_data_list)
 
     # x1 = [1, 10, 35, 27]
     # y1 = [0, -1, -0.5, 0.2]
@@ -382,6 +399,7 @@ def starter(request, meter_title, chisizm):
     y20 = y2[::-1]
     y40 = y4[::-1]
     x10 = x0[::-1]
+
     # последние элементы списков
     date_last = x10[-1]
     y1_last = y10[-1]
@@ -461,61 +479,54 @@ def starter(request, meter_title, chisizm):
     corr_h_g = toFixed(corr_h_g, 4)
     corr_t_h_g = np.corrcoef([y10, y20, y40])
 
-    data_for_clust = np.column_stack((y10, y20, y40))
-    dataNorm = preprocessing.scale(data_for_clust)
-    # вычислим растояние между каждым набором данных
-    data_dist = pdist(dataNorm, 'euclidean')
-    # иерархическая кластеризация
-    data_linkage = linkage(data_dist, method='average')
-    # Метод локтя - определяем опттим колич сегментов
-    # Показывает сумму внутри групповых вариаций
-    last = data_linkage[-10:, 2]
-    print('last=')
-    print(last)
-    last_rev = last[::-1]
-    idxs = np.arange(1, len(last) + 1)
-    # plt.plot(idxs, last_rev)
-    acceleration = np.diff(last, 2)
-    acceleration_rev = acceleration[::-1]
-    # plt.plot(idxs[:-2] + 1, acceleration_rev)
-    # plt.show()
-    clusters = acceleration_rev.argmax() + 2
-    print('clusters:', clusters)
+    if len(y1) > 1000:
 
-    p5 = figure(
-        plot_width=900,
-        tools="pan, box_zoom, reset, save",
-        x_axis_label='', y_axis_label='расстояние между измерениями',
-        title="Метод локтя - определяем опттимальное количество сегментов"
-    )
-    p5.line(idxs, last_rev, legend_label="расстояние", line_color="red")
-    p5.line(idxs[:-2] + 1, acceleration_rev, legend_label="2-я производная (ускорение)", line_color="blue")
-    # p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
-    script5, div5 = components(p5)
+        data_for_clust = np.column_stack((y10, y20, y40))
+        dataNorm = preprocessing.scale(data_for_clust)
+        # вычислим растояние между каждым набором данных
+        data_dist = pdist(dataNorm, 'euclidean')
+        # иерархическая кластеризация
+        data_linkage = linkage(data_dist, method='average')
+        # Метод локтя - определяем опттим колич сегментов
+        # Показывает сумму внутри групповых вариаций
+        last = data_linkage[-10:, 2]
+        print('last=')
+        print(last)
+        last_rev = last[::-1]
+        idxs = np.arange(1, len(last) + 1)
+        # plt.plot(idxs, last_rev)
+        acceleration = np.diff(last, 2)
+        acceleration_rev = acceleration[::-1]
+        # plt.plot(idxs[:-2] + 1, acceleration_rev)
+        # plt.show()
+        clusters = acceleration_rev.argmax() + 2
+        print('clusters:', clusters)
 
-    nClaster = 5
+        p5 = figure(
+            plot_width=900,
+            tools="pan, box_zoom, reset, save",
+            x_axis_label='', y_axis_label='расстояние между измерениями',
+            title="Метод локтя - определяем опттимальное количество сегментов"
+        )
+        p5.line(idxs, last_rev, legend_label="расстояние", line_color="red")
+        p5.line(idxs[:-2] + 1, acceleration_rev, legend_label="2-я производная (ускорение)", line_color="blue")
+        # p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
+        script5, div5 = components(p5)
 
-    graphic = fancy_dendrogram(
-        data_linkage,
-        truncate_mode='lastp',
-        p=nClaster,
-        leaf_rotation=90.,
-        leaf_font_size=12.,
-        show_contracted=True,
-        annotate_above=10,
-    )
-    # plt.show
+        nClaster = 5
 
-    # canvas = fig.canvas
-    # buf, size = canvas.print_to_buffer()
-    # image = PIL.Image.frombuffer('RGBA', size, buf, 'raw', 'RGBA', 0, 1)
-    # buffer = io.BytesIO()
-    # image.save(buffer, 'PNG')
-    # graphic = buffer.getvalue()
-    # graphic = base64.b64encode(graphic)
-    # buffer.close()
+        graphic = fancy_dendrogram(
+            data_linkage,
+            truncate_mode='lastp',
+            p=nClaster,
+            leaf_rotation=90.,
+            leaf_font_size=12.,
+            show_contracted=True,
+            annotate_above=10,
+        )
 
-    return render(request, 'ai/starter.html', {'script': script, 'div': div,
+
+        return render(request, 'ai/starter.html', {'script': script, 'div': div,
                                                'script2': script2, 'div2': div2,
                                                'script3': script3, 'div3': div3,
                                                'script4': script4, 'div4': div4,
@@ -546,9 +557,44 @@ def starter(request, meter_title, chisizm):
                                                'corr_h_g': corr_h_g,
                                                'corr_t_h_g': corr_t_h_g,
                                                'clusters': clusters,
-                                               'graphic': graphic
+                                               'graphic': graphic,
+                                               'chisizm': chisizm,
                                                # 'Acc': Acc
                                                })
+    else:
+        return render(request, 'ai/starter.html', {'script': script, 'div': div,
+                                               'script2': script2, 'div2': div2,
+                                               'script3': script3, 'div3': div3,
+                                               'script4': script4, 'div4': div4,
+                                               'metter_of_buryonka': latest_data_list,
+                                               'len_all': len_all,
+                                               'date_last': date_last,
+                                               'date_first': date_first,
+                                               't_last': y1_last,
+                                               'h_last': y2_last,
+                                               'CO2_last': y4_last,
+                                               'data': data,
+                                               'nabobj_name': nabobj_name,
+                                               'gas_name': gas_name,
+                                               'name_cow': name_cow,
+                                               'number': number,
+                                               't_median': t_median,
+                                               't_mean': t_mean,
+                                               't_std': t_std,
+                                               'h_median': h_median,
+                                               'h_mean': h_mean,
+                                               'h_std': h_std,
+                                               'g_median': g_median,
+                                               'g_mean': g_mean,
+                                               'g_std': g_std,
+                                               'corr_t_h': corr_t_h,
+                                               'corr_t_g': corr_t_g,
+                                               'corr_h_g': corr_h_g,
+                                               'corr_t_h_g': corr_t_h_g,
+                                               'chisizm': chisizm,
+                                               # 'Acc': Acc
+                                               })
+
 
 
 def leave_comment2(request, metering_id):
@@ -601,7 +647,7 @@ def cows(request, meter_title, chisizm):
     print('cows ')
     chisizm_from_post = request.POST.get('chisizm')
     print('chisizm from POST = ')
-    print(chisizm)
+    print(chisizm_from_post)
     print('meter_title = ')
     print(meter_title)
     if chisizm_from_post == None:
@@ -2432,20 +2478,21 @@ class my_controlView(APIView):
         # my_co = my_control.objects.all()
 
         try:
-            print("control = ")
+            #print("control = ")
             a = my_control.objects.filter(identificator=login)
-            # print("a = ")
-            # print(a)
+            #print("a = ")
+            #print(a)
             my_co = a.order_by('id')
-            # print("my_co = ")
-            # print(my_co)
+            #print("my_co = ")
+            #print(my_co)
         except:
             # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
             return Response({"my_control": "No data"})
 
         if len(my_co) != 0:
             serializer = my_controlSerializer(my_co, many=True)
-            # print(serializer.data[-1])
+            print("my_control = ")
+            print(serializer.data[-1])
             return Response({"my_control": serializer.data[-1]})
         else:
             return Response({"my_control": "No data"})
@@ -2533,3 +2580,131 @@ def fancy_dendrogram(*args, **kwargs):
     graphic = graphic.decode('utf-8')
 
     return graphic
+
+
+def test_js(request):
+    return render(request, 'ai/test_js.html')
+
+def test_js2(request):
+    return render(request, 'ai/test_js2.html')
+
+#def test_js3(request):
+    #    meter_title = 'Francheska'
+    #chisizm = 1000
+    #return render(request, 'ai/test_js3.html', {'meter_title': meter_title, 'chisizm': chisizm})
+
+def test_js3(request, meter_title, chisizm):
+
+    return render(request, 'ai/test_js3.html', {'meter_title': meter_title, 'chisizm': chisizm})
+
+class my_dataView(APIView):
+    def get(self, request):
+        print("class my_dataView")
+        login = request.GET.get('login')
+        meter_title = request.GET.get('meter_title')
+        chisizm = int(request.GET.get('chisizm'))
+        # p = request.GET.get('param')
+        p = 5
+        print("login=")
+        print(login)
+        print("meter_title=")
+        print(meter_title)
+        print("chisizm=")
+        print(chisizm)
+        voc = get_ident(request)
+        print('voc = ')
+        print(voc)
+        ident = voc['ident']
+        print('ident = ')
+        print(ident)
+
+
+
+        try:
+            print('try')
+            q = Metering.objects.filter(meter_title=meter_title, meter_identificator=str(ident))
+            print('q =')
+
+        except:
+            print('except:')
+            # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+            return Response({"my_data_try": "No data"})
+
+
+        print('до my_data')
+        my_data = q.order_by('-meter_datetime')[:chisizm]
+        print('после my_data')
+
+        x0 = []
+        y1 = []
+        y2 = []
+        y4 = []
+        # d = []
+        number = []
+        i = 1
+        # format = '%b %d %Y %I:%M%p' # Формат
+        format = '%H:%M'  # Формат
+
+        for data in my_data:
+            x0.append(data.meter_datetime)
+            y1.append(data.meter_temperature)
+            y2.append(data.meter_humidity)
+            y4.append(data.meter_CO2)
+            number.append(i)
+            i = i + 1
+
+        name_cow = data.meter_title
+        print(name_cow)
+
+        # result =np.column_stack((latest_data_list, number))
+
+        if name_cow == 'Yarushka':
+            nabobj_name = 'Объект 1'
+            gas_name = 'LPG'
+        elif name_cow == 'Mumuka':
+            nabobj_name = 'Объект 2'
+            gas_name = 'CO2'
+        elif name_cow == 'Francheska':
+            nabobj_name = 'Объект 3'
+            gas_name = 'LPG'
+        elif name_cow == 'Buryonka':
+            nabobj_name = 'Объект 4'
+            gas_name = 'Smoke gas'
+        elif name_cow == 'Vestka':
+            nabobj_name = 'Объект 5'
+            gas_name = 'CH4'
+        else:
+            nabobj_name = 'Объект NoName'
+            gas_name = 'UnKnown gas'
+
+        print(nabobj_name)
+
+        x1 = range(len(y1))
+        print(len(y1))
+
+        # Формируем список с обратной последовательностью
+        y10 = y1[::-1]
+        y20 = y2[::-1]
+        y40 = y4[::-1]
+        x10 = x0[::-1]
+        print('p =')
+        print(p)
+        param = int(p)
+        print(param)
+        res = y10
+        if (param // 3) == 0:
+            res = y10
+        if (param // 3) == 1:
+            res = y20
+        if (param // 3) == 2:
+            res = y40
+
+        if len(my_data) != 0:
+            print("len(my_data)= ")
+            print(len(my_data))
+            # print(y40)
+            res = y10 + y20 + y40
+
+            return Response(res)
+        else:
+            return Response({"my_data": "No data"})

@@ -26,7 +26,7 @@ def test(request):
     return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ДЛЯ ЗАПРОСА TEST</h3>")
 
 
-def detal(request , article_id):
+def detal(request, article_id):
 
     try:
         a = Article.objects.get(id=article_id)
@@ -60,14 +60,15 @@ def detal(request , article_id):
 
     if request.user.is_authenticated == True:
         acc = account_check(request)
-        return render(request, 'webex/blbla.html', {'article': a, 'latest_comments_list': latest_comments_list,'par':par, 'Acc': acc})
+        return render(request, 'webex/blbla.html', {'article': a, 'latest_comments_list': latest_comments_list, 'par':par, 'Acc': acc})
     else:
         return render(request, 'webex/blbla.html', {'article': a, 'latest_comments_list': latest_comments_list, 'par': par})
+
 
 def leave_comment(request, article_id):
     # создаем комментарий к статье и запускаем процедуру detal, которая читает все комментарии, включая новый и
     # отправляет на blbla.html
-    if request.user.is_authenticated == True:#20201223
+    if request.user.is_authenticated == True: #20201223
         try:
             a = Article.objects.get(id=article_id)
         except:
@@ -75,7 +76,7 @@ def leave_comment(request, article_id):
         #a.comment_set.create(author_name = request.POST['name'], comment_text = request.POST['text']) #20201223
         a.comment_set.create(author_name=request.user, comment_text=request.POST['text'])
 
-        return HttpResponseRedirect(reverse('webex:detal', args = (a.id,)))
+        return HttpResponseRedirect(reverse('webex:detal', args=(a.id,)))
     else:#20201223
         return render(request, 'webex/auth_req.html')#20201223
 
