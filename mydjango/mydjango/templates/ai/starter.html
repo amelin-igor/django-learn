@@ -4,9 +4,9 @@
 
 {% block content %}
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.0.1.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.0.1.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.2.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.2.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.2.min.css"/>
 
 
 <table width="1150" border="0">
@@ -19,26 +19,32 @@
 
                 Всего измерений {{len_all}}
 
-{{div| safe}}
+{{ div | safe }}
 
-    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.js"></script>
-    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.0.1.min.js"></script>
-    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.0.1.min.js"></script>
-    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.0.1.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.3.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.3.2.min.js"></script>
 
 
-{{script|safe}}
+{{ script | safe }}
 
           </td>
           <td>
                 <ul>
-
-
-
                     <li>
                         {% url 'ai:nabobj' as url_nabobj %}
-                        <a class = " nav_link {% if url_pdstart == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты</a>
+                        <a class = " nav_link {% if url_nabobj == request.path %}activate{% endif %} " href = "{{url_nabobj}}"> Наблюдаемые объекты</a>
                     </li>
+
+                    <li>
+
+                        {% url 'ai:test_js3_page' name_cow chisizm as url_test_js3 %}
+                         <! <a href="{% url 'ai:test_js3_page' 'Mumuka' 150 %}"> <!Мониторинг_3 (автообновление)</a>
+                         <a class = " nav_link {% if url_test_js3 == request.path %}activate{% endif %} " href = "{{url_test_js3}}"> Мониторинг(автообновление)</a>
+
+                    </li>
+
 
                     {% if request.user.is_superuser %}
                     <li>
@@ -52,21 +58,18 @@
                     {% endif %}
 
 
-
-
                         <hr>
 
                           <form action = "{% url 'ai:cows_page' name_cow 1000 %}" method = "POST">
                             {% csrf_token %}
 
                              <input id="chisizm" name="chisizm" type="text" placeholder="Число измерений" value="{{chisizm}}">   </br>
-                            <!<button type="submit"> <!Пополнить баланс<!</button>
                             <input class="btn btn-primary" type="submit" value="Отобразить">
                           </form>
 
 
 
-                    </ul>
+                </ul>
 
                 </td>
         </tr>
@@ -88,8 +91,8 @@
 <b>коэффициент корреляции (h, g) = {{corr_h_g}}</b> </br>
 <hr>
 
-{{div2| safe}}
-{{script2| safe}}
+{{ div2 | safe }}
+{{ script2 | safe }}
 <hr>
 <b>температура(t) </b></br>
 медианная : {{t_median}}<sup>o</sup>С  </br>
@@ -104,8 +107,8 @@
 
 <hr>
 
-{{div3| safe}}
-{{script3| safe}}
+{{div3 | safe}}
+{{script3 | safe}}
 <hr>
 
 <b>температура(t) </b></br>
@@ -121,8 +124,8 @@
 
 <hr>
 
-{{div4| safe}}
-{{script4| safe}}
+{{div4 | safe}}
+{{script4 | safe}}
 <hr>
 
 <b>матрица корреляции(t, h, g) = {{corr_t_h_g}}</b> </br>
@@ -132,8 +135,8 @@
 </br>
 
 
-{{div5| safe}}
-{{script5| safe}}
+{{div5 | safe}}
+{{script5 | safe}}
 
 Число кластеров = {{clusters}}
 
@@ -148,7 +151,7 @@
                             {% if metter_of_buryonka %}
                                 {% for c in metter_of_buryonka %}
                                     <p>
-                                        {{nabobj_name}} | {{c.meter_datetime}} | температура={{c.meter_temperature}}<sup>o</sup> | влажность={{c.meter_humidity}}% | {{gas_name}}={{c.meter_CO2}} ppm </br>
+                                        {{nabobj_name}} | {{c.meter_datetime |date:"Y-m-d H:i:s"}} | температура={{c.meter_temperature}}<sup>o</sup> | влажность={{c.meter_humidity}}% | {{gas_name}}={{c.meter_CO2}} ppm </br>
                                     </p>
                                 {% endfor %}
 

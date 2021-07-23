@@ -1,13 +1,15 @@
-#from bokeh.models import Scatter
+# from bokeh.models import Scatter
 import logging
 
 from bokeh.embed import components
 from bokeh.plotting import figure, curdoc
 from bokeh.models import Range1d, LinearAxis
 
+import matplotlib
+
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.http import  HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 
@@ -15,21 +17,21 @@ from .models import Metering, Customer, Customerrec, Note, my_control
 
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
-from .forms import AuthUserForm, RegisterUserForm,CustomCheckbox
+from .forms import AuthUserForm, RegisterUserForm, CustomCheckbox
 from django.views.generic import CreateView
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 
-
 from django import forms
 
 from django.core.mail import send_mail
-#import secrets
+# import secrets
 import uuid
 import os
 from .forms import account_check, get_ident
-from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordChangeDoneView
-#import json
+from django.contrib.auth.views import PasswordResetView, PasswordChangeView, PasswordResetDoneView, \
+    PasswordResetConfirmView, PasswordResetCompleteView, PasswordChangeDoneView
+# import json
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import my_controlSerializer
@@ -37,62 +39,64 @@ import numpy as np
 from bokeh.layouts import gridplot
 from scipy.cluster.hierarchy import *
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-
 from io import BytesIO
 import base64
+import matplotlib.pyplot as plt
+from django.contrib.auth import get_user_model
+
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+from datetime import datetime, timedelta
+
+matplotlib.use('Agg')
 
 # import numpy as np
-# import pandas as pd
-# import matplotlib
-# import matplotlib.pyplot as plt
+#import pandas as pd
+
 # matplotlib.style.use('ggplot')
 
-#from bokeh.resources import INLINE
-#import plotly.plotly as py
-#import plotly.graph_objs as go
-#from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-#from  plotly.offline.offline import _plot_html
+# from bokeh.resources import INLINE
+# import plotly.plotly as py
+# import plotly.graph_objs as go
+# from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+# from  plotly.offline.offline import _plot_html
 
-#from bokeh.util.string import encode_utf8
-from django.contrib.auth import get_user_model
+# from bokeh.util.string import encode_utf8
+
+
 User = get_user_model()
 
-
-
-
 password_old = {
-    'FERM1':'1',
-    'FERM2':'2',
-    'FERM3':'3',
+    'FERM1': '1',
+    'FERM2': '2',
+    'FERM3': '3',
 }
 
 password = {
-        '00001': '6546556987',
-        '00002': '36645954',
-        '00003': '984544559',
-        '00004': '4565654123',
-        '00005': '4566586123',
-        '00006': '33847866558',
-        '00007': '166954887',
-        '00008': '111265587',
-        '00009': '8642589',
-        '00010': '1155887',
-        '00011': '2865449762',
-        '00012': '159755432',
-        '00013': '259755432',
-        '00033': '597554321',
-    }
+    '00001': '6546556987',
+    '00002': '36645954',
+    '00003': '984544559',
+    '00004': '4565654123',
+    '00005': '4566586123',
+    '00006': '33847866558',
+    '00007': '166954887',
+    '00008': '111265587',
+    '00009': '8642589',
+    '00010': '1155887',
+    '00011': '2865449762',
+    '00012': '159755432',
+    '00013': '259755432',
+    '00033': '597554321',
+}
 
-#http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
-#http://127.0.0.1:8000/add/?login=FERM2&pasw=2&name=Vestka&t=38&h=25&co2=2&ch4=21&n2o=11
+
+# http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
+# http://127.0.0.1:8000/add/?login=FERM2&pasw=2&name=Vestka&t=38&h=25&co2=2&ch4=21&n2o=11
 
 # Create your views here.
 
-#def test(request):
+# def test(request):
 #    return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
 
 def start(request):
@@ -114,29 +118,31 @@ def start(request):
         for cus in customer:
             X.append(cus.account)
             Y.append(cus.bank)
-        #print(X)
-        #print(Y)
+        # print(X)
+        # print(Y)
     else:
         print("User.is_not_authenticated")
         print(request.user.is_authenticated)
         X.append("0")
         Y.append(" ")
 
-    if len(X) ==0:
+    if len(X) == 0:
         X.append("0")
 
     return render(request, 'ai/start.html', {'Acc': X[-1]})
 
+
 def page1(request):
     return render(request, 'ai/page1.html')
+
 
 def page2(request):
     return render(request, 'ai/page2.html')
 
-def add(request):
 
+def add(request):
     print('add')
-    #now = datetime.datetime.now()
+    # now = datetime.datetime.now()
     now = timezone.now()
     nameandpaswcorrect = False
     cowlog = open('cow.log', 'a')
@@ -145,7 +151,7 @@ def add(request):
         pasw = request.GET.get('pasw')
         t = request.GET.get('t')
         h = request.GET.get('h')
-        pcname='pcname'
+        pcname = 'pcname'
 
         name = request.GET.get('name')
         co2 = request.GET.get('co2')
@@ -154,140 +160,141 @@ def add(request):
         mt = "Пояснения "
         data = 't = ' + str(t) + ' h = ' + str(h) + ' CO2 = ' + str(co2) + ' CH4 = ' + str(ch4) + ' n2o = ' + str(n2o)
 
-        #if t > 25:
-
+        # if t > 25:
 
         if login in password:
             if password[login] == pasw:
                 nameandpaswcorrect = True
 
         if nameandpaswcorrect == True:
-                a = 'YES_'
-                logging.info('user: ' + login)
-                if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
-                    cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                        'REMOTE_ADDR'] + ' / '  + pcname + ' / ' +
-                                data + ' / ' + '\n')
-                else:
-                    cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                        'HTTP_X_FORWARDED_FOR'] + ' / ' +  pcname + ' / ' +
-                                "data" + ' / ' + '\n')
-                    # if behind a proxy
-        else:
-                a = 'Wrong user credentials!_'
-                logging.warning('user ' + login + ': Wrong user credentials!')
-                if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
-                    cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                        'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
-                                data + ' / ' + ': Wrong user credentials!' + '\n')
-                else:
-                    cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                        'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
-                                data + ' / ' + ': Wrong user credentials!' + '\n')
-                    # if behind a proxy
-
-    except ValueError:
-            logging.warning('user ' + login + ': Wrong user name_' + '\n')
+            a = 'YES_'
+            logging.info('user: ' + login)
             if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
                 cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
                     'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
-                            data + ' / ' + ': Wrong user name!' + '\n')
+                             data + ' / ' + '\n')
             else:
                 cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
                     'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
-                            data + ' / ' + ': Wrong user name!' + '\n')
+                             "data" + ' / ' + '\n')
+                # if behind a proxy
+        else:
+            a = 'Wrong user credentials!_'
+            logging.warning('user ' + login + ': Wrong user credentials!')
+            if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+                cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                    'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
+                             data + ' / ' + ': Wrong user credentials!' + '\n')
+            else:
+                cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                    'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
+                             data + ' / ' + ': Wrong user credentials!' + '\n')
+                # if behind a proxy
 
+    except ValueError:
+        logging.warning('user ' + login + ': Wrong user name_' + '\n')
+        if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+            cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
+                         data + ' / ' + ': Wrong user name!' + '\n')
+        else:
+            cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
+                         data + ' / ' + ': Wrong user name!' + '\n')
 
-    #print(login)
-    #print(name)
-    #print(mt)
-    #print(t)
-    #print(h)
-    #print(co2)
-    #print(ch4)
-    #print(n2o)
-    #print(now)
+    # print(login)
+    # print(name)
+    # print(mt)
+    # print(t)
+    # print(h)
+    # print(co2)
+    # print(ch4)
+    # print(n2o)
+    # print(now)
 
-
-
-
-    m = Metering(meter_identificator = login, meter_title = name, meter_text = mt, meter_temperature = t, meter_humidity = h, meter_CO2 = co2,
-                 meter_CH4 = ch4, meter_N2O = n2o, meter_datetime = now )
+    m = Metering(meter_identificator=login, meter_title=name, meter_text=mt, meter_temperature=t, meter_humidity=h,
+                 meter_CO2=co2,
+                 meter_CH4=ch4, meter_N2O=n2o, meter_datetime=now)
     m.save()
-    #return render(request, 'ai/add.html', {'metering': m})
-    #return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
-    #return render(request, 'ai/pdstart.html')
+    # return render(request, 'ai/add.html', {'metering': m})
+    # return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
+    # return render(request, 'ai/pdstart.html')
 
-    #return JsonResponse({'meter_identificator' : login, 'meter_title' : name, 'meter_text' : mt, 'meter_temperature' : t})
-    #return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
+    # return JsonResponse({'meter_identificator' : login, 'meter_title' : name, 'meter_text' : mt, 'meter_temperature' : t})
+    # return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
 
-    #request_data = json.loads(request.body.decode('utf-8'))  # This assumes your request body is JSON
+    # request_data = json.loads(request.body.decode('utf-8'))  # This assumes your request body is JSON
 
     v1 = my_condition_2(request)
-    #json_data = json.dumps(v1)
-    #print(v1)
+    # json_data = json.dumps(v1)
+    # print(v1)
     return JsonResponse(v1, safe=False)
 
-    #return Response({"key": "value", "key2": "value2"})
+    # return Response({"key": "value", "key2": "value2"})
 
-    #a = 'Yes'
-    #b = 'No'
+    # a = 'Yes'
+    # b = 'No'
     # return a
-    #return render(request, 'ai/sms.html', {'reason': a, "sms_sux": b})
+    # return render(request, 'ai/sms.html', {'reason': a, "sms_sux": b})
+
 
 def show(request):
-    q =  Metering.objects.filter(meter_title ="Mumuka")
+    q = Metering.objects.filter(meter_title="Mumuka")
     z = {'metter_of_buryonka': q}
     return render(request, 'ai/show.html', z)
 
+
 def graph1(request):
     try:
-        #q =  Metering.objects.get(meter_title ="Mumuka")
+        # q =  Metering.objects.get(meter_title ="Mumuka")
         q = Metering.objects.filter(meter_title="Mumuka")
-        #Yarushka
+        # Yarushka
     except:
         raise Http404("Нет запрашиваемых данных")
 
     latest_data_list = q.order_by('-meter_datetime')[:3]
-    #p = figure(title="Данные датчиков", x_axis_label='время в кварталах', y_axis_label='вероятность дефолта')
-    #x1 =  latest_data_list.meter_datetime
-    x1 =[1,2,3]
-    #y1 = latest_data_list.Metering.meter_temperature
+    # p = figure(title="Данные датчиков", x_axis_label='время в кварталах', y_axis_label='вероятность дефолта')
+    # x1 =  latest_data_list.meter_datetime
+    x1 = [1, 2, 3]
+    # y1 = latest_data_list.Metering.meter_temperature
     y1 = [2, 4, 8]
-    #y2 = latest_data_list.meter_humidity
+    # y2 = latest_data_list.meter_humidity
     y2 = [10, 4, 1]
-    #p.line(x1, y1, legend_label="y1", line_width=2, color='red')
-    #p.line(x1, y2, line_width=2, color='green')
+    # p.line(x1, y1, legend_label="y1", line_width=2, color='red')
+    # p.line(x1, y2, line_width=2, color='green')
     # grab the static resources
-    #js_resources = INLINE.render_js()
-    #css_resources = INLINE.render_css()
-    #script, div = components(p)
-    #html = render(         "graph1.html",p)
-    #return encode_utf8(html)
-    #return html
+    # js_resources = INLINE.render_js()
+    # css_resources = INLINE.render_css()
+    # script, div = components(p)
+    # html = render(         "graph1.html",p)
+    # return encode_utf8(html)
+    # return html
     z = {'metter_of_buryonka': latest_data_list}
 
     return render(request, 'ai/graph1.html', z)
 
+
 def graph2(request):
     pass
+
 
 def addcom(request, metering_id):
     latest_comments_list = []
     try:
-       q = Metering.objects.filter(id = metering_id)
+        q = Metering.objects.filter(id=metering_id)
     except:
-       raise Http404("Нет запрашиваемых данных")
-       #latest_comments_list = ["Нет запрашиваемых данных"]
-       #latest_comments_list = append("Нет запрашиваемых данных")
-    #latest_data_list = q.order_by('-meter_datetime')[:4]
-    #try:
+        raise Http404("Нет запрашиваемых данных")
+        # latest_comments_list = ["Нет запрашиваемых данных"]
+        # latest_comments_list = append("Нет запрашиваемых данных")
+    # latest_data_list = q.order_by('-meter_datetime')[:4]
+    # try:
     #     latest_comments_list = q.note_set.order_by('-id')[:10]
-    #except:
+    # except:
     #      raise Http404("Нет комментариев к измерению")
 
-    #return render(request, 'ai/addcom.html', {'metter_of_buryonka': q, 'latest_comments_list': latest_comments_list})
-    return render(request, 'ai/form1.html',{'metter_of_buryonka': q, 'latest_comments_list': latest_comments_list, 'name':'name'})
+    # return render(request, 'ai/addcom.html', {'metter_of_buryonka': q, 'latest_comments_list': latest_comments_list})
+    return render(request, 'ai/form1.html',
+                  {'metter_of_buryonka': q, 'latest_comments_list': latest_comments_list, 'name': 'name'})
 
 
 def starter(request, meter_title, chisizm):
@@ -295,73 +302,88 @@ def starter(request, meter_title, chisizm):
     from scipy.spatial.distance import pdist
 
     from sklearn.cluster import KMeans
-   # Acc = account_check(request)
-    #ident = get_ident(request)
-
+    # Acc = account_check(request)
+    # ident = get_ident(request)
+    now = timezone.now()
     voc = get_ident(request)
     print('voc = ')
     print(voc)
     ident = voc['ident']
 
+
+    print(now)
+
+    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=183)).delete()
+    now = timezone.now()
+    print(now)
+
     try:
-       q = Metering.objects.filter(meter_title=meter_title, meter_identificator = ident)
-       # q = Metering.objects.filter(meter_title=meter_title)
-        #Yarushka
+        q = Metering.objects.filter(meter_title=meter_title, meter_identificator=ident)
+        now = timezone.now()
+        print(now)
     except:
-       raise Http404("Нет запрашиваемых данных")
+        raise Http404("Нет запрашиваемых данных")
     y3 = []
 
     for data in q:
         y3.append(data.meter_humidity)
     len_all = len(y3)
+    print('len_all=')
+    print(len_all)
+
+
+
+
 
     latest_data_list = q.order_by('-meter_datetime')[:chisizm]
     z = {'metter_of_buryonka': latest_data_list}
+    # print('latest_data_list =')
+    # print(latest_data_list)
 
-    #x1 = [1, 10, 35, 27]
-    #y1 = [0, -1, -0.5, 0.2]
+    # x1 = [1, 10, 35, 27]
+    # y1 = [0, -1, -0.5, 0.2]
 
-    #x1 = latest_data_list.meter_datetime
-    #y1 = latest_data_list.Metering.meter_temperature
+    # x1 = latest_data_list.meter_datetime
+    # y1 = latest_data_list.Metering.meter_temperature
     x0 = []
     y1 = []
     y2 = []
     y4 = []
-    #d = []
+    # d = []
     number = []
     i = 1
-    #format = '%b %d %Y %I:%M%p' # Формат
-    format = '%H:%M' # Формат
+    # format = '%b %d %Y %I:%M%p' # Формат
+    format = '%H:%M'  # Формат
 
     for data in latest_data_list:
-        #d=str(datetime.date(data.meter_datetime))
+        # d=str(datetime.date(data.meter_datetime))
         x0.append(data.meter_datetime)
         y1.append(data.meter_temperature)
         y2.append(data.meter_humidity)
         y4.append(data.meter_CO2)
 
-        #n.append(data.meter_humidity)
+        # n.append(data.meter_humidity)
         number.append(i)
         i = i + 1
 
     name_cow = data.meter_title
     print(name_cow)
 
-    #result =np.column_stack((latest_data_list, number))
+    # result =np.column_stack((latest_data_list, number))
 
-    if name_cow =='Yarushka':
+    if name_cow == 'Yarushka':
         nabobj_name = 'Объект 1'
         gas_name = 'LPG'
-    elif name_cow =='Mumuka':
+    elif name_cow == 'Mumuka':
         nabobj_name = 'Объект 2'
         gas_name = 'CO2'
     elif name_cow == 'Francheska':
         nabobj_name = 'Объект 3'
         gas_name = 'LPG'
-    elif name_cow =='Buryonka':
+    elif name_cow == 'Buryonka':
         nabobj_name = 'Объект 4'
         gas_name = 'Smoke gas'
-    elif name_cow =='Vestka':
+    elif name_cow == 'Vestka':
         nabobj_name = 'Объект 5'
         gas_name = 'CH4'
     else:
@@ -370,14 +392,15 @@ def starter(request, meter_title, chisizm):
 
     x1 = range(len(y1))
     print(len(y1))
-    #for el in x0:
-     #   d.append(el)
-    #Формируем список с обратной последовательностью
+    # for el in x0:
+    #   d.append(el)
+    # Формируем список с обратной последовательностью
     y10 = y1[::-1]
     y20 = y2[::-1]
     y40 = y4[::-1]
     x10 = x0[::-1]
-    #последние элементы списков
+
+    # последние элементы списков
     date_last = x10[-1]
     y1_last = y10[-1]
     y2_last = y20[-1]
@@ -388,26 +411,26 @@ def starter(request, meter_title, chisizm):
     y2_first = y20[0]
 
     # y2 = latest_data_list.meter_humidity
-    #plot = figure()
-    #plot.circle(x1, y1, size=5, color="blue")
-    #plot.circle(x1, y2, size=5, color="red")
+    # plot = figure()
+    # plot.circle(x1, y1, size=5, color="blue")
+    # plot.circle(x1, y2, size=5, color="red")
     plot = figure(
-    plot_width=900,
-    tools = "pan, box_zoom, reset, save",
-    x_axis_label='номер измерения', y_axis_label='температура, влажность'
+        plot_width=900,
+        tools="pan, box_zoom, reset, save",
+        x_axis_label='номер измерения', y_axis_label='температура, влажность'
     )
 
-    plot.line (x1, y10, legend_label = "температура, С", line_color="red")
-    #plot.line(x1, y2, legend="влажность, %", line_color="blue", line_dash="4 4")
-    plot.line(x1, y20, legend_label = "влажность, %", line_color="blue")
-    plot.line(x1, y40, legend_label = "концентрация, ppm", line_color="green")
+    plot.line(x1, y10, legend_label="температура, С", line_color="red")
+    # plot.line(x1, y2, legend="влажность, %", line_color="blue", line_dash="4 4")
+    plot.line(x1, y20, legend_label="влажность, %", line_color="blue")
+    plot.line(x1, y40, legend_label="концентрация, ppm", line_color="green")
 
-    name_dop_osi = 'концентрация ' + gas_name+ ', ppm'
-    #script, div = components(plot)
+    name_dop_osi = 'концентрация ' + gas_name + ', ppm'
+    # script, div = components(plot)
     script, div = components(myplot_2(request, x1, y10, y20, y40, 'температура, °С', 'влажность, %', name_dop_osi))
-    #print(div)
-    #x = np.concatenate((y40, y10, y20))
-    #y = np.concatenate((y10, y20, y40))
+    # print(div)
+    # x = np.concatenate((y40, y10, y20))
+    # y = np.concatenate((y10, y20, y40))
 
     x = y20
     y = y40
@@ -428,7 +451,7 @@ def starter(request, meter_title, chisizm):
     x = y10
     y = y40
     x_axis = 'Температура, С'
-    y_axis ='Концентрация, ppm'
+    y_axis = 'Концентрация, ppm'
     title = "Распределение температуры и и концентрации газа"
     layout = my_layout(x, y, x_axis, y_axis, title)
     script4, div4 = components(layout)
@@ -448,104 +471,130 @@ def starter(request, meter_title, chisizm):
     h_std = toFixed(h_std, 2)
     g_mean = toFixed(g_mean, 2)
     g_std = toFixed(g_std, 2)
-    corr_t_h = np.corrcoef(y10, y20)[1,0]
+    corr_t_h = np.corrcoef(y10, y20)[1, 0]
     corr_t_h = toFixed(corr_t_h, 4)
-    corr_t_g = np.corrcoef(y10, y40)[1,0]
+    corr_t_g = np.corrcoef(y10, y40)[1, 0]
     corr_t_g = toFixed(corr_t_g, 4)
-    corr_h_g = np.corrcoef(y20, y40)[1,0]
+    corr_h_g = np.corrcoef(y20, y40)[1, 0]
     corr_h_g = toFixed(corr_h_g, 4)
     corr_t_h_g = np.corrcoef([y10, y20, y40])
 
-    data_for_clust =np.column_stack((y10, y20, y40))
-    dataNorm = preprocessing.scale(data_for_clust)
-    # вычислим растояние между каждым набором данных
-    data_dist = pdist(dataNorm, 'euclidean')
-    # иерархическая кластеризация
-    data_linkage = linkage(data_dist, method='average')
-    # Метод локтя - определяем опттим колич сегментов
-    # Показывает сумму внутри групповых вариаций
-    last = data_linkage[-10:, 2]
-    print('last=')
-    print(last)
-    last_rev = last[::-1]
-    idxs = np.arange(1, len(last) + 1)
-    #plt.plot(idxs, last_rev)
-    acceleration = np.diff(last, 2)
-    acceleration_rev = acceleration[::-1]
-    #plt.plot(idxs[:-2] + 1, acceleration_rev)
-    #plt.show()
-    clusters = acceleration_rev.argmax() + 2
-    print('clusters:', clusters)
+    if len(y1) > 1000:
 
-    p5 = figure(
-    plot_width=900,
-    tools = "pan, box_zoom, reset, save",
-    x_axis_label='', y_axis_label='расстояние между измерениями',
-    title="Метод локтя - определяем опттимальное количество сегментов"
-    )
-    p5.line (idxs, last_rev, legend_label = "расстояние", line_color="red")
-    p5.line(idxs[:-2]+1,acceleration_rev, legend_label="2-я производная (ускорение)", line_color="blue")
-    # p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
-    script5, div5 = components(p5)
+        data_for_clust = np.column_stack((y10, y20, y40))
+        dataNorm = preprocessing.scale(data_for_clust)
+        # вычислим растояние между каждым набором данных
+        data_dist = pdist(dataNorm, 'euclidean')
+        # иерархическая кластеризация
+        data_linkage = linkage(data_dist, method='average')
+        # Метод локтя - определяем опттим колич сегментов
+        # Показывает сумму внутри групповых вариаций
+        last = data_linkage[-10:, 2]
+        print('last=')
+        print(last)
+        last_rev = last[::-1]
+        idxs = np.arange(1, len(last) + 1)
+        # plt.plot(idxs, last_rev)
+        acceleration = np.diff(last, 2)
+        acceleration_rev = acceleration[::-1]
+        # plt.plot(idxs[:-2] + 1, acceleration_rev)
+        # plt.show()
+        clusters = acceleration_rev.argmax() + 2
+        print('clusters:', clusters)
 
-    nClaster = 5
+        p5 = figure(
+            plot_width=900,
+            tools="pan, box_zoom, reset, save",
+            x_axis_label='', y_axis_label='расстояние между измерениями',
+            title="Метод локтя - определяем опттимальное количество сегментов"
+        )
+        p5.line(idxs, last_rev, legend_label="расстояние", line_color="red")
+        p5.line(idxs[:-2] + 1, acceleration_rev, legend_label="2-я производная (ускорение)", line_color="blue")
+        # p2.circle([1, 2.5, 3, 2], [2, 3, 1, 1.5], radius=0.3, alpha=0.5)
+        script5, div5 = components(p5)
 
-    graphic = fancy_dendrogram(
-        data_linkage,
-        truncate_mode='lastp',
-        p=nClaster,
-        leaf_rotation=90.,
-        leaf_font_size=12.,
-        show_contracted=True,
-        annotate_above=10,
-    )
-    #plt.show
+        nClaster = 5
 
-    #canvas = fig.canvas
-    #buf, size = canvas.print_to_buffer()
-    #image = PIL.Image.frombuffer('RGBA', size, buf, 'raw', 'RGBA', 0, 1)
-    #buffer = io.BytesIO()
-    #image.save(buffer, 'PNG')
-    #graphic = buffer.getvalue()
-    #graphic = base64.b64encode(graphic)
-    #buffer.close()
+        graphic = fancy_dendrogram(
+            data_linkage,
+            truncate_mode='lastp',
+            p=nClaster,
+            leaf_rotation=90.,
+            leaf_font_size=12.,
+            show_contracted=True,
+            annotate_above=10,
+        )
 
 
-
-    return render(request, 'ai/starter.html', {'script': script, 'div' : div,
-                                               'script2': script2, 'div2' : div2,
-                                               'script3': script3, 'div3' : div3,
-                                               'script4': script4, 'div4' : div4,
+        return render(request, 'ai/starter.html', {'script': script, 'div': div,
+                                               'script2': script2, 'div2': div2,
+                                               'script3': script3, 'div3': div3,
+                                               'script4': script4, 'div4': div4,
                                                'script5': script5, 'div5': div5,
                                                'metter_of_buryonka': latest_data_list,
                                                'len_all': len_all,
                                                'date_last': date_last,
                                                'date_first': date_first,
-                                               't_last':y1_last,
-                                               'h_last':y2_last,
-                                               'CO2_last':y4_last,
+                                               't_last': y1_last,
+                                               'h_last': y2_last,
+                                               'CO2_last': y4_last,
                                                'data': data,
-                                               'nabobj_name' : nabobj_name,
+                                               'nabobj_name': nabobj_name,
                                                'gas_name': gas_name,
-                                               'name_cow':name_cow,
-                                               'number':number,
-                                               't_median':t_median,
-                                               't_mean':t_mean,
-                                               't_std':t_std,
-                                               'h_median':h_median,
-                                               'h_mean':h_mean,
-                                               'h_std':h_std,
-                                               'g_median':g_median,
-                                               'g_mean':g_mean,
-                                               'g_std':g_std,
+                                               'name_cow': name_cow,
+                                               'number': number,
+                                               't_median': t_median,
+                                               't_mean': t_mean,
+                                               't_std': t_std,
+                                               'h_median': h_median,
+                                               'h_mean': h_mean,
+                                               'h_std': h_std,
+                                               'g_median': g_median,
+                                               'g_mean': g_mean,
+                                               'g_std': g_std,
                                                'corr_t_h': corr_t_h,
                                                'corr_t_g': corr_t_g,
                                                'corr_h_g': corr_h_g,
                                                'corr_t_h_g': corr_t_h_g,
-                                               'clusters' : clusters,
-                                               'graphic': graphic
+                                               'clusters': clusters,
+                                               'graphic': graphic,
+                                               'chisizm': chisizm,
                                                # 'Acc': Acc
                                                })
+    else:
+        return render(request, 'ai/starter.html', {'script': script, 'div': div,
+                                               'script2': script2, 'div2': div2,
+                                               'script3': script3, 'div3': div3,
+                                               'script4': script4, 'div4': div4,
+                                               'metter_of_buryonka': latest_data_list,
+                                               'len_all': len_all,
+                                               'date_last': date_last,
+                                               'date_first': date_first,
+                                               't_last': y1_last,
+                                               'h_last': y2_last,
+                                               'CO2_last': y4_last,
+                                               'data': data,
+                                               'nabobj_name': nabobj_name,
+                                               'gas_name': gas_name,
+                                               'name_cow': name_cow,
+                                               'number': number,
+                                               't_median': t_median,
+                                               't_mean': t_mean,
+                                               't_std': t_std,
+                                               'h_median': h_median,
+                                               'h_mean': h_mean,
+                                               'h_std': h_std,
+                                               'g_median': g_median,
+                                               'g_mean': g_mean,
+                                               'g_std': g_std,
+                                               'corr_t_h': corr_t_h,
+                                               'corr_t_g': corr_t_g,
+                                               'corr_h_g': corr_h_g,
+                                               'corr_t_h_g': corr_t_h_g,
+                                               'chisizm': chisizm,
+                                               # 'Acc': Acc
+                                               })
+
 
 
 def leave_comment2(request, metering_id):
@@ -553,56 +602,59 @@ def leave_comment2(request, metering_id):
         a = Metering.objects.get(id=metering_id)
     except:
         raise Http404("Статья не найдена!")
-    a.note_set.create(author_name = request.POST['name'], comment_text = request.POST['text'])
+    a.note_set.create(author_name=request.POST['name'], comment_text=request.POST['text'])
 
-    return HttpResponseRedirect(reverse('ai:addcom', args = (a.id,)))
+    return HttpResponseRedirect(reverse('ai:addcom', args=(a.id,)))
 
-#def detal2(request , metering_id):
-    #    try:
-    #        a = Metering.objects.get(id = metering_id)
-    #except:
-    #    raise Http404("Статья не найдена!")
 
-    #latest_comments_list = a.note_set.order_by('-id')[:10]
+# def detal2(request , metering_id):
+#    try:
+#        a = Metering.objects.get(id = metering_id)
+# except:
+#    raise Http404("Статья не найдена!")
 
-    #return render(request, 'ai/addcom.html', {'metering': a, 'latest_comments_list': latest_comments_list})
+# latest_comments_list = a.note_set.order_by('-id')[:10]
+
+# return render(request, 'ai/addcom.html', {'metering': a, 'latest_comments_list': latest_comments_list})
 
 def index2(request):
-    #latest_metering_list = Metering.objects.order_by('-meter_datetime')[:4]
+    # latest_metering_list = Metering.objects.order_by('-meter_datetime')[:4]
     latest_metering_list = Metering.objects.all()
     return render(request, 'ai/list2.html', {'latest_metering_list': latest_metering_list})
 
-def nabobj(request):
 
-    #ident = get_ident(request)
+def nabobj(request):
+    # ident = get_ident(request)
     voc = get_ident(request)
     print('voc = ')
     print(voc)
 
     ident = voc['ident']
 
-    print ('nabobj_ident =')
-    print (ident)
-    #cow_metering_list = Metering.objects.all()
-    cow_metering_list = Metering.objects.filter(meter_identificator = ident)
-    X=[]
+    print('nabobj_ident =')
+    print(ident)
+    # cow_metering_list = Metering.objects.all()
+    cow_metering_list = Metering.objects.filter(meter_identificator=ident)
+    X = []
     for cow in cow_metering_list:
         X.append(cow.meter_title)
     XM = set(X)
     y = sorted(list(XM))
     return render(request, 'ai/nabobj.html', {'cow_metering_list': y})
 
+
 def cows(request, meter_title, chisizm):
     print('cows ')
     chisizm_from_post = request.POST.get('chisizm')
     print('chisizm from POST = ')
-    print(chisizm)
+    print(chisizm_from_post)
     print('meter_title = ')
     print(meter_title)
     if chisizm_from_post == None:
         chisizm_from_post = chisizm
 
     return HttpResponseRedirect(reverse('ai:starter', args=(meter_title, chisizm_from_post)))
+
 
 def pdstart(request):
     print('pdstart_qqq')
@@ -614,44 +666,42 @@ def pdstart(request):
         except:
             raise Http404("Пользователь отсутствует")
         print("User.is_authenticated")
-        print(request.user.is_authenticated )
+        print(request.user.is_authenticated)
         print(request.user.id)
         print(request.user.first_name)
         print(request.user.last_name)
-        #a = Customer.objects.get(id=request.user.id)
+        # a = Customer.objects.get(id=request.user.id)
 
-        #m = Customer(phone = '+7(495)7777777',email = "alex@bmail.org", account = 100, user_id = request.user.id)
-        #m.save()
+        # m = Customer(phone = '+7(495)7777777',email = "alex@bmail.org", account = 100, user_id = request.user.id)
+        # m.save()
 
-        #Cus = Customer.objects.filter(id = request.user.id)
+        # Cus = Customer.objects.filter(id = request.user.id)
         customer = a.customer_set.order_by('id')[:]
 
         for cus in customer:
             X.append(cus.account)
             Y.append(cus.bank)
 
-        #print(X)
-        #print(Y)
+        # print(X)
+        # print(Y)
 
     else:
         print("User.is_not_authenticated")
-        print(request.user.is_authenticated )
+        print(request.user.is_authenticated)
         X.append("0")
         Y.append(" ")
 
-    if len(X) ==0:
+    if len(X) == 0:
         X.append("0")
-    return render(request, 'ai/pdstart.html',{'Acc': X[-1]})
-
-
+    return render(request, 'ai/pdstart.html', {'Acc': X[-1]})
 
 
 def pdcalc(request):
-    #import numpy as np
+    # import numpy as np
     import pandas as pd
     from sklearn.preprocessing import StandardScaler  # Стандартизация данных
     import tensorflow
-    #from tensorflow
+    # from tensorflow
     import keras
     import joblib
     import keras.backend as K
@@ -662,38 +712,37 @@ def pdcalc(request):
     print("regn = ")
     print(regn)
 
+    # import adodbapi
 
-    #import adodbapi
-
-    #database = "MosReg.mdb"
+    # database = "MosReg.mdb"
     ##constr = 'Provider=Microsoft.Jet.OLEDB.4.0; Data Source=D:\BASE_MDB\MosReg.mdb'
     ##constr = 'Provider=Microsoft.ace.oledb.12.0; Data Source=D:\BASE_MDB\MosReg.mdb'
-    #constr = 'Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s'
-    #tablename = "Banks"
+    # constr = 'Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s'
+    # tablename = "Banks"
 
     # Подключаемся к базе данных.
-    #conn = adodbapi.connect(constr)
+    # conn = adodbapi.connect(constr)
 
     # Создаем курсор.
-    #cur = conn.cursor()
+    # cur = conn.cursor()
 
     # Получаем все данные.
-    #sql = "select * from Banks"
-    #sql = "select * from %s" % tablename
-    #cur.execute(sql)
+    # sql = "select * from Banks"
+    # sql = "select * from %s" % tablename
+    # cur.execute(sql)
 
     # Показываем результат.
-    #result = cur.fetchall()
-    #for item in result:
+    # result = cur.fetchall()
+    # for item in result:
     #   print(item)
 
     # Завершаем подключение.
-    #cur.close()
-    #conn.close()
+    # cur.close()
+    # conn.close()
 
-    bank= {
-        '1' : 'UniCredit Bank',
-        '170':'РН банк',
+    bank = {
+        '1': 'UniCredit Bank',
+        '170': 'РН банк',
         '316': 'Home Credit&Finance Bank',
         '354': 'Gazprombank',
         '963': 'Совкомбанк',
@@ -710,7 +759,7 @@ def pdcalc(request):
         '1920': 'Ланта-Банк',
         '2664': 'АКБ Славия (ЗАО)',
         '1614': 'ЗАУБЕР Банк',
-        '436' : 'ОАО Банк Санкт-Петербург',
+        '436': 'ОАО Банк Санкт-Петербург',
         '1439': 'Банк «Возрождение» (ОАО)',
         '2766': 'ОТП Банк',
         '3016': 'Нордеа Банк',
@@ -750,7 +799,7 @@ def pdcalc(request):
         '3124': 'НС–Банк',
         '2241': 'КИВИ Банк',
         '2929': 'ББР Банк',
-        '665' : 'ГТ банк',
+        '665': 'ГТ банк',
         '2590': 'АК БАРС',
         '2546': 'НОВИКОМБАНК',
         '3261': 'ВНЕШПРОМБАНК',
@@ -762,10 +811,10 @@ def pdcalc(request):
         '2989': 'Фондсервисбанк',
         '2763': 'Инвестторгбанк',
         '2490': 'Генбанк',
-        '912' : 'Московский Индустриальный банк',
+        '912': 'Московский Индустриальный банк',
         '1810': 'Азиатско-Тихоокеанский Банк',
         '3279': 'НБ ТРАСТ',
-        '554' : 'Солидарность',
+        '554': 'Солидарность',
         '1581': 'БТА-Казань(ОАО)',
         '1673': 'Банк Майский',
         '2764': 'ТЭМБР-БАНК',
@@ -775,7 +824,7 @@ def pdcalc(request):
 
     }
 
-    Dat1 ={
+    Dat1 = {
         '0': '1/07/2010',
         '1': '1/10/2010',
         '2': '1/01/2011',
@@ -981,27 +1030,27 @@ def pdcalc(request):
     }
 
     name = serv(request, str(regn))
-    #data = pd.read_csv("Train4-X42-b60-D38B.csv", sep=';')
-    #data.describe()
-    #y = data['43']
-    #X = data.drop('43', axis=1)
-    #X = X.apply(pd.to_numeric)
-    #scaler = StandardScaler(copy=False).fit(X)
-    #X_train = scaler.transform(X)
-    #scaler_filename = "scaler_x42a.save"
-    #joblib.dump(scaler, scaler_filename)
+    # data = pd.read_csv("Train4-X42-b60-D38B.csv", sep=';')
+    # data.describe()
+    # y = data['43']
+    # X = data.drop('43', axis=1)
+    # X = X.apply(pd.to_numeric)
+    # scaler = StandardScaler(copy=False).fit(X)
+    # X_train = scaler.transform(X)
+    # scaler_filename = "scaler_x42a.save"
+    # joblib.dump(scaler, scaler_filename)
 
-    #файл для шкалирования (стандартизации) нужно делать в этой процедуре (файл шкалирования из Jupyter Notebook не подходит
-    #data = pd.read_csv("Train-XXX+47_D41B.csv", sep=';')
-    #X = data
-    #cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33', '34',
+    # файл для шкалирования (стандартизации) нужно делать в этой процедуре (файл шкалирования из Jupyter Notebook не подходит
+    # data = pd.read_csv("Train-XXX+47_D41B.csv", sep=';')
+    # X = data
+    # cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33', '34',
     #        '38', '39', '40', '41', '42', '43', '44', '45', '46', '48']
-    #X.drop(cols, axis=1, inplace=True)
-    #X = X.apply(pd.to_numeric)
-    #scaler = StandardScaler(copy=False).fit(X)
-    #X_train = scaler.transform(X)
-    #scaler_filename = "scaler_x20a.save"
-    #joblib.dump(scaler, scaler_filename)
+    # X.drop(cols, axis=1, inplace=True)
+    # X = X.apply(pd.to_numeric)
+    # scaler = StandardScaler(copy=False).fit(X)
+    # X_train = scaler.transform(X)
+    # scaler_filename = "scaler_x20a.save"
+    # joblib.dump(scaler, scaler_filename)
 
     now = timezone.now()
     print('pdcalc')
@@ -1013,7 +1062,7 @@ def pdcalc(request):
         except:
             raise Http404("Пользователь отсутствует")
         print("User.is_authenticated = ", request.user.is_authenticated)
-        #print(request.user.is_authenticated)
+        # print(request.user.is_authenticated)
         print(request.user.id)
         print(request.user.first_name)
         print(request.user.last_name)
@@ -1025,10 +1074,10 @@ def pdcalc(request):
             X.append(cus.account)
             Y.append(cus.bank)
 
-        #print(X)
-        #print(Y)
+        # print(X)
+        # print(Y)
 
-        #name = bank[regn]
+        # name = bank[regn]
 
     else:
         print("User.is_not_authenticated")
@@ -1046,16 +1095,16 @@ def pdcalc(request):
 
     if depositIsNull == True:
         mes = 'Не достаточно средств на текущем счете - пополните депозит'
-        return render(request, 'ai/deposit.html', mes = mes)
+        return render(request, 'ai/deposit.html', mes=mes)
     else:
         mod = "model_X20_jpt22"
-        #mod = "model_X51PCZ_37"
-        #if regn in bank:
-        #    name = bank[regn]
-        #else:
-        #    name = 'Название не определено'
-        #print(name)
 
+        # mod = "model_X51PCZ_37"
+        # if regn in bank:
+        #    name = bank[regn]
+        # else:
+        #    name = 'Название не определено'
+        # print(name)
 
         # Пересоздаем ту же самую модель, включая веса и оптимизатор.
         def mean_pred2(y_true, y_pred):
@@ -1075,21 +1124,21 @@ def pdcalc(request):
         txt = regn
         print("txt =")
         print(txt)
-        #wayf='D:\TEMP2\CSV\X42\Testob-' + str(regn) + 'A42.csv'
+        # wayf='D:\TEMP2\CSV\X42\Testob-' + str(regn) + 'A42.csv'
         wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'A42.csv'
         check_file = os.path.exists(wayf)
         print(check_file)
         print(wayf)
         if not check_file:
             wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'A51.csv'
-            #wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'PCZ69.csv'
+            # wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'PCZ69.csv'
             check_file = os.path.exists(wayf)
             print(check_file)
             print(wayf)
-            #cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-             #       '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
+            # cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
+            #       '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
             cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51' ]
+                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
 
             Dat = Dat2
         else:
@@ -1100,13 +1149,12 @@ def pdcalc(request):
 
         info = 'Ответ сети: Расчет не возможен - отсутствует отчетность банка ' + name + ' (лицензия №' + regn + ')'
         if not check_file:
-            return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info' : info})
+            return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info': info})
 
         data2 = pd.read_csv(wayf, sep=',')
         ds2 = data2.shape[1]
         if ds2 == 56:
             cols = cols + ['52', '53', '54', '55', '56']
-
 
         X_new1 = data2
 
@@ -1128,13 +1176,11 @@ def pdcalc(request):
         print(X_new1.shape[1])
 
         if X_new1.shape[1] != 20:
-            return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info' : info})
+            return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info': info})
 
         X_new1 = X_new1.apply(pd.to_numeric)
         print('после pd.to_numeric X_new[1:5]=')
         print(X_new1[1:5])
-
-
 
         X_new = scaler.transform(X_new1)
         ChDat = X_new.shape[0]
@@ -1143,20 +1189,18 @@ def pdcalc(request):
         print('len(X_new[1]) = ')
         print(len(X_new[1]))
 
-
-
         # расчет предсказания
         predictions = model.predict(X_new)
-        #ChDat = 41
-        #ChDat = len(X_new[1])
-        #определяем число строк в массиве X_new
-        ChDat=X_new.shape[0]
+        # ChDat = 41
+        # ChDat = len(X_new[1])
+        # определяем число строк в массиве X_new
+        ChDat = X_new.shape[0]
 
         print("ChDat...")
         x = np.arange(0, ChDat, 1)
         print("x = ", x)
 
-        #y1 = predictions
+        # y1 = predictions
         tmp = predictions
         k = 0.000757014277148727
         vdd = (-np.log(tmp) / k) / 365
@@ -1260,32 +1304,31 @@ def pdcalc(request):
                 y6.append('положительный')
             if y3[i] - y4[i] < -2:
                 y6.append('отрицательный')
-            if abs(y3[i] - y4[i]) <=2:
+            if abs(y3[i] - y4[i]) <= 2:
                 y6.append('стабильный')
             i = i + 1
-
 
         # уточнить критерий успешно произведенного расчета if i > 0:
         if i > 0:
             XX = X[-1]
             XX = XX - 1
             X[-1] = XX
-            m = Customer(phone='+7(495)7777777', bank = name, account = XX, user_id=request.user.id, datetime=now)
+            m = Customer(phone='+7(495)7777777', bank=name, account=XX, user_id=request.user.id, datetime=now)
             m.save()
 
-        #y3 = []
-        #y3.append(x[::-1])
-        #y3.append(y1[::-1])
-        #y3.append(y2[::-1])
+        # y3 = []
+        # y3.append(x[::-1])
+        # y3.append(y1[::-1])
+        # y3.append(y2[::-1])
         # Формируем список с обратной последовательностью
         y22 = y2[::-1]
 
-        #расчетные данные data2 из csv - файла
-        #cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33', '34',
+        # расчетные данные data2 из csv - файла
+        # cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33', '34',
         #        '38', '39', '40', '41', '42', '43', '44', '45', '46']
-        #data2 = data2.apply(pd.to_numeric)
-        #print('data2 =')
-        #print(data2)
+        # data2 = data2.apply(pd.to_numeric)
+        # print('data2 =')
+        # print(data2)
         z1 = data2['1']
         z2 = data2['2']
         z4 = data2['4']
@@ -1310,38 +1353,37 @@ def pdcalc(request):
         z37 = data2['37']
         z47 = data2['47']
 
-
         print('len(x) = ', len(x))
         tab = []
         tab2 = []
         otchetnost_full = []
-        for i in range (len(x)):
-            #print('i =', i )
-            #print('Dat =', Dat[str(i)])
+        for i in range(len(x)):
+            # print('i =', i )
+            # print('Dat =', Dat[str(i)])
             y1[i] = toFixed(y1[i], 10)
             y2[i] = toFixed(y2[i], 10)
             y4[i] = toFixed(y4[i], 1)
-            z1[i] = float(toFixed(data2['1'][i],5)) #уровень просроченных процентов
-            z2[i] = float(toFixed(data2['2'][i], 5)) #Общая срочная КА
-            z4[i] = float(toFixed(data2['4'][i], 5)) #уровень риска активов
-            z5[i] = float(toFixed(data2['5'][i], 5)) #уровень риска капитала
-            z6[i] = float(toFixed(data2['6'][i], 5)) #время оборачиваемости кп
-            z10[i] = float(toFixed(data2['10'][i], 5))#ЛАМ / Активы
-            z11[i] = float(toFixed(data2['11'][i], 5)) #Прибыль / Активы
-            z12[i] = float(toFixed(data2['12'][i], 5)) #Прибыль / Капитал
-            z14[i] = float(toFixed(data2['14'][i], 5)) #Коэфф. замещения
-            z15[i] = float(toFixed(data2['15'][i], 5)) #E_int
-            z16[i] = float(toFixed(data2['16'][i], 5)) #H12
-            z17[i] = float(toFixed(data2['17'][i], 5)) #E_pr / E_int
+            z1[i] = float(toFixed(data2['1'][i], 5))  # уровень просроченных процентов
+            z2[i] = float(toFixed(data2['2'][i], 5))  # Общая срочная КА
+            z4[i] = float(toFixed(data2['4'][i], 5))  # уровень риска активов
+            z5[i] = float(toFixed(data2['5'][i], 5))  # уровень риска капитала
+            z6[i] = float(toFixed(data2['6'][i], 5))  # время оборачиваемости кп
+            z10[i] = float(toFixed(data2['10'][i], 5))  # ЛАМ / Активы
+            z11[i] = float(toFixed(data2['11'][i], 5))  # Прибыль / Активы
+            z12[i] = float(toFixed(data2['12'][i], 5))  # Прибыль / Капитал
+            z14[i] = float(toFixed(data2['14'][i], 5))  # Коэфф. замещения
+            z15[i] = float(toFixed(data2['15'][i], 5))  # E_int
+            z16[i] = float(toFixed(data2['16'][i], 5))  # H12
+            z17[i] = float(toFixed(data2['17'][i], 5))  # E_pr / E_int
 
             z26[i] = float(toFixed(z26[i], 5))  # Норматив H7
             z28[i] = float(toFixed(z28[i], 5))  # Норматив H10_1
-            z30[i] = float(toFixed(z30[i], 5))  #Средства граждан / активы
-            z31[i] = float(toFixed(z31[i], 5)) #Доля активов в системе
-            z35[i] = float(toFixed(z35[i], 5)) #фактор V1
-            z36[i] = float(toFixed(z36[i], 5))  #фактор V2
-            z37[i] = float(toFixed(z37[i], 5))  #фактор V3
-            z47[i] = float(toFixed(z47[i], 5))  #доля МБК в активах
+            z30[i] = float(toFixed(z30[i], 5))  # Средства граждан / активы
+            z31[i] = float(toFixed(z31[i], 5))  # Доля активов в системе
+            z35[i] = float(toFixed(z35[i], 5))  # фактор V1
+            z36[i] = float(toFixed(z36[i], 5))  # фактор V2
+            z37[i] = float(toFixed(z37[i], 5))  # фактор V3
+            z47[i] = float(toFixed(z47[i], 5))  # доля МБК в активах
 
             if (z12[i] == 0 and z5[i] == 5) or (z2[i] == 0 and z4[i] == 0):
 
@@ -1354,14 +1396,14 @@ def pdcalc(request):
             print(z14[i])
 
             # x-номер квартала
-            row = [x[i], y1[i], y2[i], Dat[str(i)], y5[i], y6[i], y4[i],otchetnost_full[i]]
+            row = [x[i], y1[i], y2[i], Dat[str(i)], y5[i], y6[i], y4[i], otchetnost_full[i]]
             tab.append(row)
             row = [
-                    x[i], Dat[str(i)], z1[i], z2[i], z4[i], z5[i], z6[i], z10[i], z11[i], z12[i], z14[i], z15[i], z16[i], z17[i],
-                    z26[i], z28[i], z30[i], z31[i], z35[i], z36[i], z37[i], z47[i]
-                   ]
+                x[i], Dat[str(i)], z1[i], z2[i], z4[i], z5[i], z6[i], z10[i], z11[i], z12[i], z14[i], z15[i], z16[i],
+                z17[i],
+                z26[i], z28[i], z30[i], z31[i], z35[i], z36[i], z37[i], z47[i]
+            ]
             tab2.append(row)
-
 
         pokaz = [
             '№ квартал',
@@ -1415,7 +1457,7 @@ def pdcalc(request):
         ]
 
         plot = figure(
-            title = 'Вероятность дефолта банка '+ name,
+            title='Вероятность дефолта банка ' + name,
             plot_width=900,
             tools="pan, box_zoom, reset, save",
             x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
@@ -1423,7 +1465,7 @@ def pdcalc(request):
         plot.line(x, y1, legend_label="вероятность дефолта", line_color="red")
         plot.line(x, y2, legend_label="вероятность дефолта фильтр", line_color="blue")
         script, div = components(plot)
-        #-----------------график 2-----------------------------------------------------------------------------
+        # -----------------график 2-----------------------------------------------------------------------------
 
         script2, div2 = components(myplot(request, x, y1, z14, pokaz[10], name))
         script3, div3 = components(myplot(request, x, y1, z15, pokaz[11], name))
@@ -1447,19 +1489,19 @@ def pdcalc(request):
         script20, div20 = components(myplot(request, x, y1, z37, pokaz[20], name))
         script21, div21 = components(myplot(request, x, y1, z47, pokaz[21], name))
 
-
-        return render(request, 'ai/pdcalc.html', {'b_regn' : regn, 'b_name': name, 'x': x,
-                                              'y1' : y1, 'y2':y2, 'y3': y3, 'y22': y22, 'Acc': X[-1], 'tab':tab, 'dat': Dat,
-                                               'tab2':tab2, 'pokaz':pokaz, 'pokaz_shrot':pokaz_shrot,
-                                                'script': script, 'div': div,
-                                                'script2': script2, 'div2' : div2,
-                                                'script3': script3, 'div3': div3,
-                                                'script4': script4, 'div4': div4,
-                                                'script5': script5, 'div5': div5,
-                                                'script6': script6, 'div6': div6,
-                                                'script7': script7, 'div7': div7,
-                                                'script8': script8, 'div8': div8,
-                                                'script9': script9, 'div9': div9,
+        return render(request, 'ai/pdcalc.html', {'b_regn': regn, 'b_name': name, 'x': x,
+                                                  'y1': y1, 'y2': y2, 'y3': y3, 'y22': y22, 'Acc': X[-1], 'tab': tab,
+                                                  'dat': Dat,
+                                                  'tab2': tab2, 'pokaz': pokaz, 'pokaz_shrot': pokaz_shrot,
+                                                  'script': script, 'div': div,
+                                                  'script2': script2, 'div2': div2,
+                                                  'script3': script3, 'div3': div3,
+                                                  'script4': script4, 'div4': div4,
+                                                  'script5': script5, 'div5': div5,
+                                                  'script6': script6, 'div6': div6,
+                                                  'script7': script7, 'div7': div7,
+                                                  'script8': script8, 'div8': div8,
+                                                  'script9': script9, 'div9': div9,
                                                   'script10': script10, 'div10': div10,
                                                   'script11': script11, 'div11': div11,
                                                   'script12': script12, 'div12': div12,
@@ -1474,30 +1516,32 @@ def pdcalc(request):
                                                   'script21': script21, 'div21': div21,
 
                                                   })
+
+
 def myplot(request, x, y1, y2, name_y2, b_name):
-        y2 = y2.ravel()
-        plot = figure(
-            title='Вероятность дефолта банка и '+name_y2 + ' банка ' + b_name,
-            plot_width=1100,
-            tools="pan, box_zoom, reset, save",
-            x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
-        )
-        plot.y_range = Range1d(start=0 - max(y1) * 0.1, end=max(y1) * 1.1)
-        print('y2 = ')
-        print(y2)
-        if min(y2) < 0:
-            plot.extra_y_ranges['temp'] = Range1d(start=min(y2) + min(y2) * 0.1, end=max(y2) - 0.1*min(y2))
-        elif min(y2) == max(y2) == 0:
-            plot.extra_y_ranges['temp'] = Range1d(start= -0.1, end=0.1)
-        else:
-            plot.extra_y_ranges['temp'] = Range1d(start= (min(y2)- max(y2) * 0.1), end = (max(y2)*1.1))
+    y2 = y2.ravel()
+    plot = figure(
+        title='Вероятность дефолта банка и ' + name_y2 + ' банка ' + b_name,
+        plot_width=1100,
+        tools="pan, box_zoom, reset, save",
+        x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
+    )
+    plot.y_range = Range1d(start=0 - max(y1) * 0.1, end=max(y1) * 1.1)
+    print('y2 = ')
+    print(y2)
+    if min(y2) < 0:
+        plot.extra_y_ranges['temp'] = Range1d(start=min(y2) + min(y2) * 0.1, end=max(y2) - 0.1 * min(y2))
+    elif min(y2) == max(y2) == 0:
+        plot.extra_y_ranges['temp'] = Range1d(start=-0.1, end=0.1)
+    else:
+        plot.extra_y_ranges['temp'] = Range1d(start=(min(y2) - max(y2) * 0.1), end=(max(y2) * 1.1))
 
-        plot.add_layout(LinearAxis(y_range_name='temp', axis_label=name_y2), 'right')
+    plot.add_layout(LinearAxis(y_range_name='temp', axis_label=name_y2), 'right')
 
-        plot.line(x, y1, legend_label="вероятность дефолта", line_color="red")
-        plot.line(x, y2, legend_label=name_y2, line_color="blue", y_range_name='temp')
-        #script2, div2 = components(plot)
-        return plot
+    plot.line(x, y1, legend_label="вероятность дефолта", line_color="red")
+    plot.line(x, y2, legend_label=name_y2, line_color="blue", y_range_name='temp')
+    # script2, div2 = components(plot)
+    return plot
 
 
 def myplot_2(request, x, y1, y2, y4, name_y1, name_y2, name_y4):
@@ -1509,8 +1553,8 @@ def myplot_2(request, x, y1, y2, y4, name_y1, name_y2, name_y4):
         y_axis_label='температура, С° | влажность, %'
     )
 
-    #print('y2 = ')
-    #print(y2)
+    # print('y2 = ')
+    # print(y2)
     y1_min = min(y1)
     y2_min = min(y2)
     y1_max = max(y1)
@@ -1526,19 +1570,19 @@ def myplot_2(request, x, y1, y2, y4, name_y1, name_y2, name_y4):
         y_max = y2_max
 
     if min(y1) < 0:
-        plot.y_range = Range1d(start=y_min + y_min * 0.1, end=y_max  - 0.1 * y_min)
+        plot.y_range = Range1d(start=y_min + y_min * 0.1, end=y_max - 0.1 * y_min)
     elif y_min == y_max == 0:
         plot.y_range = Range1d(start=-0.1, end=0.1)
     else:
-        plot.y_range = Range1d(start = (y_min - y_max * 0.1), end = (y_max * 1.1))
+        plot.y_range = Range1d(start=(y_min - y_max * 0.1), end=(y_max * 1.1))
 
     plot.extra_y_ranges['CO2'] = Range1d(start=min(y4) * 0.9, end=max(y4) * 1.1)
 
-    plot.add_layout(LinearAxis(y_range_name='CO2', axis_label = name_y4), 'right')
+    plot.add_layout(LinearAxis(y_range_name='CO2', axis_label=name_y4), 'right')
 
-    plot.line(x, y1, legend_label = name_y1, line_color="red")
-    plot.line(x, y2, legend_label = name_y2, line_color="blue")
-    plot.line(x, y4, legend_label = name_y4, line_color="green", y_range_name='CO2')
+    plot.line(x, y1, legend_label=name_y1, line_color="red")
+    plot.line(x, y2, legend_label=name_y2, line_color="blue")
+    plot.line(x, y4, legend_label=name_y4, line_color="green", y_range_name='CO2')
     # script2, div2 = components(plot)
     return plot
 
@@ -1547,30 +1591,32 @@ def myplot_2(request, x, y1, y2, y4, name_y1, name_y2, name_y4):
 #  Metering.objects.filter(meter_datetime__day=21).delete()
 
 class MyprojectLoginView(LoginView):
-        template_name = 'ai/login.html'
-        formclass = AuthUserForm
-        success_url = reverse_lazy('ai:start')
-        def get_success_url(self):
-            return self.success_url
+    template_name = 'ai/login.html'
+    formclass = AuthUserForm
+    success_url = reverse_lazy('ai:start')
+
+    def get_success_url(self):
+        return self.success_url
 
 
 class RegisterUserView(CreateView):
-        model = User
-        template_name = 'ai/register_page.html'
-        form_class = RegisterUserForm
-        #success_url = reverse_lazy('ai:recstart_page')
-        #success_url = reverse_lazy('ai:nabobj')
-        success_url = reverse_lazy('ai:codegen_emailsend_page')
-        success_msg = "Пользователь успешно зарегистрирован"
+    model = User
+    template_name = 'ai/register_page.html'
+    form_class = RegisterUserForm
+    # success_url = reverse_lazy('ai:recstart_page')
+    # success_url = reverse_lazy('ai:nabobj')
+    success_url = reverse_lazy('ai:codegen_emailsend_page')
+    success_msg = "Пользователь успешно зарегистрирован"
 
-        def form_valid(self, form):
-            form_valid = super().form_valid(form)
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-            email = form.cleaned_data["email"]
-            aut_user = authenticate(username = username, password = password )
-            login(self.request, aut_user)
-            return form_valid
+    def form_valid(self, form):
+        form_valid = super().form_valid(form)
+        username = form.cleaned_data["username"]
+        password = form.cleaned_data["password"]
+        email = form.cleaned_data["email"]
+        aut_user = authenticate(username=username, password=password)
+        login(self.request, aut_user)
+        return form_valid
+
 
 class MyprojectLogout(LogoutView):
     next_page = reverse_lazy('ai:start')
@@ -1579,18 +1625,20 @@ class MyprojectLogout(LogoutView):
 def toFixed(numObj, digits=0):
     return f"{numObj:.{digits}f}"
 
+
 def upDateAcc(request):
     print("upDateAcc")
     acc = account_check(request)
     howmatch = int(acc) + int(request.POST['name'])
     now = timezone.now()
-    m = Customer(phone='+7(495)7777777', bank="пополнение баланса", account=howmatch, user_id=request.user.id, datetime=now)
+    m = Customer(phone='+7(495)7777777', bank="пополнение баланса", account=howmatch, user_id=request.user.id,
+                 datetime=now)
     m.save()
     acc = account_check(request)
     return render(request, 'ai/pdstart.html', {'Acc': acc})
 
-def rascheti(request):
 
+def rascheti(request):
     import os
     import sqlite3
     import urllib  # URL functions
@@ -1599,9 +1647,8 @@ def rascheti(request):
     bd = 'D:\WORK\Python\django-learn\mydjango\db.sqlite3'
     now = timezone.now()
     f = open('D:/TEMP3/tudent.txt', 'a')
-    f.write('Отчет о действиях клиента ' + request.user.first_name +' '+ request.user.last_name +'\n')
+    f.write('Отчет о действиях клиента ' + request.user.first_name + ' ' + request.user.last_name + '\n')
     f.write('Дата и время формирования отчета: ' + str(now) + '\n')
-
 
     tdate = strftime("%d-%m")
 
@@ -1617,11 +1664,11 @@ def rascheti(request):
         bank = row[1]
         datetime = row[2]
         user_id = row[3]
-        f.write('user_id ='+ str(user_id) + ' счет: ' + str(account) + ' действие: ' + bank + ' on ' + datetime + '\n')
+        f.write('user_id =' + str(user_id) + ' счет: ' + str(account) + ' действие: ' + bank + ' on ' + datetime + '\n')
 
-
-    #return render(request, 'ai/start.html', {'Acc': X[-1]})
+    # return render(request, 'ai/start.html', {'Acc': X[-1]})
     return render(request, 'ai/start.html')
+
 
 def rascheti2(request):
     print("rascheti2")
@@ -1657,13 +1704,16 @@ def rascheti2(request):
             user_id.append(cus.user_id)
             row = [cus.user_id, cus.bank, cus.account, cus.datetime]
             tab.append(row)
-            f.write('user_id =' + str(cus.user_id) + ' счет: ' + str(cus.account) + ' действие: ' + cus.bank + ' on ' + str(cus.datetime) + '\n')
+            f.write(
+                'user_id =' + str(cus.user_id) + ' счет: ' + str(cus.account) + ' действие: ' + cus.bank + ' on ' + str(
+                    cus.datetime) + '\n')
     f.close()
-    if len(X) ==0:
+    if len(X) == 0:
         X.append("0")
-    return render(request, 'ai/rascheti.html', {'Acc': X[-1], 'bank' : bank,'datetime':datetime,'user_id':user_id, 'tab': tab,
-                                                'len_X': len(X), 'now' : now, 'first_name': request.user.first_name,
-                                                'last_name': request.user.last_name})
+    return render(request, 'ai/rascheti.html',
+                  {'Acc': X[-1], 'bank': bank, 'datetime': datetime, 'user_id': user_id, 'tab': tab,
+                   'len_X': len(X), 'now': now, 'first_name': request.user.first_name,
+                   'last_name': request.user.last_name})
 
 
 def sendSMS(request):
@@ -1676,17 +1726,17 @@ def sendSMS(request):
     f = open('D:/TEMP3/sms.txt', 'a')
     tdate = strftime("%d-%m")
 
-    sname =  'Igor'
+    sname = 'Igor'
     snumber = '+79037835429'
     message = (
-                sname + ' There will be NO training tonight on the ' + tdate + ' Sorry for the late notice, I have sent a mail as well, just trying to reach everyone, please do not reply to this message as this is automated')
+            sname + ' There will be NO training tonight on the ' + tdate + ' Sorry for the late notice, I have sent a mail as well, just trying to reach everyone, please do not reply to this message as this is automated')
 
     username = 'YOUR_USERNAME'
     sender = 'WHO_IS_SENDING_THE_MAIL'
     hash = 'YOUR HASH YOU GET FROM YOUR ACCOUNT'
 
     numbers = (snumber)
-    print('numbers = '+numbers)
+    print('numbers = ' + numbers)
     # Set flag to 1 to simulate sending, this saves your credits while you are testing your code. # To send real message set this flag to 0
     test_flag = 1
 
@@ -1703,12 +1753,12 @@ def sendSMS(request):
 
     url = 'http://www.txtlocal.com/sendsmspost.php'
     print('values = ')
-    print( values)
+    print(values)
     postdata = urlencode(values)
     print("postdata = ")
     print(postdata)
-    #req = urllib.request.Request(url, postdata)
-    #req = urllib.request.Request(url, postdata)
+    # req = urllib.request.Request(url, postdata)
+    # req = urllib.request.Request(url, postdata)
     req = url + postdata
     print('req = ')
     print(req)
@@ -1728,13 +1778,15 @@ def sendSMS(request):
         e_reason = e.reason
         sms_sux = 'Send failed!'
 
-        return render(request, 'ai/sms.html',{'e_reason':e_reason, "sms_sux":sms_sux})
+        return render(request, 'ai/sms.html', {'e_reason': e_reason, "sms_sux": sms_sux})
+
 
 def offerta(request):
     return render(request, 'ai/offerta.html')
 
-def fillrec(request):
 
+def fillrec(request):
+    import string
     msg = ''
     un = user_name(request)
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), un + '_tuden.txt')
@@ -1742,7 +1794,7 @@ def fillrec(request):
     codeword_2 = f.read()
     f.close()
 
-    #codeword_2 = 'c3be4580-0774-407d-b3fe-4f3ffd97c7b8'
+    # codeword_2 = 'c3be4580-0774-407d-b3fe-4f3ffd97c7b8'
     client_name = request.POST.get('client_name')
     client_name_full = request.POST.get('client_name_full')
     adres = request.POST.get('adres')
@@ -1751,7 +1803,7 @@ def fillrec(request):
     kpp = request.POST.get('kpp')
     ogrn = request.POST.get('ogrn')
     country = request.POST.get('country')
-    identificator= request.POST.get('identificator')
+    identificator = request.POST.get('identificator')
     codeword = request.POST.get('codeword')
     ul_fl = request.POST.get('ul_fl')
     print('ul_fl =')
@@ -1761,9 +1813,12 @@ def fillrec(request):
     print('codeword =')
     print(codeword)
 
+    codeword = codeword.strip()
+    codeword_2 = codeword_2.strip()
+
     now = timezone.now()
-    #if len(inn) == 0:
-        #inn = 'ИНН'
+    # if len(inn) == 0:
+    # inn = 'ИНН'
 
     if ul_fl == 'true':
         vid = 1
@@ -1774,7 +1829,7 @@ def fillrec(request):
     Y = []
     Z = []
     try:
-        a = Customerrec.objects.filter(identificator = identificator)
+        a = Customerrec.objects.filter(identificator=identificator)
         customer = a.order_by('id')[:]
         print('customer = ')
         print(customer)
@@ -1792,7 +1847,7 @@ def fillrec(request):
         print(Z)
     except:
         i = 0
-        #raise Http404("Комлект с таким номером отсутствует")
+        # raise Http404("Комлект с таким номером отсутствует")
 
     mist_fild = []
 
@@ -1801,7 +1856,6 @@ def fillrec(request):
         mist_fild.append('true')
 
     if ul_fl == 'true':
-
 
         if len(client_name) == 0:
             mist_fild.append('true')
@@ -1845,7 +1899,6 @@ def fillrec(request):
         else:
             mist_fild.append('false')
 
-
         if codeword != codeword_2:
             msg += ' введите кодовое слово'
             mist_fild.append('true')
@@ -1865,7 +1918,7 @@ def fillrec(request):
                                                          'client_name_full_2': client_name_full,
                                                          'country_2': country, 'kpp_2': kpp,
                                                          'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
-                                                         'identificator_2':identificator})
+                                                         'identificator_2': identificator})
         else:
             msg_1 = 'Проверка введенных данных выполнена. '
             msg = msg_1 + msg
@@ -1882,28 +1935,32 @@ def fillrec(request):
                                                          'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
                                                          'identificator_2': identificator})
 
-    m = Customerrec(client_name = client_name, adres = adres , inn=inn, user_id=request.user.id,
-                    client_name_full = client_name_full, country =country, kpp = kpp, ogrn = ogrn,
-                    comment = codeword, vid = vid, datetime = now, identificator = identificator)
+    m = Customerrec(client_name=client_name, adres=adres, inn=inn, user_id=request.user.id,
+                    client_name_full=client_name_full, country=country, kpp=kpp, ogrn=ogrn,
+                    comment=codeword, vid=vid, datetime=now, identificator=identificator)
     m.save()
     msg += 'Реквизиты занесены в базу данных.'
 
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), un + '_tuden.txt')
     os.remove(path)
 
-    return render(request, 'ai/message.html',{'msg': msg})
+    return render(request, 'ai/message.html', {'msg': msg})
+
 
 def recstart(request):
     return render(request, 'ai/recvizits.html')
 
+
 def recstart2(request):
     return render(request, 'ai/recvizits2.html')
+
 
 def deposit(request):
     print("deposit")
     acc = account_check(request)
     mes = ''
-    return render(request, 'ai/deposit.html',{'Acc': acc, 'mes' : mes})
+    return render(request, 'ai/deposit.html', {'Acc': acc, 'mes': mes})
+
 
 def serv(request, zapros):
     import pandas as pd
@@ -1917,8 +1974,8 @@ def serv(request, zapros):
         regnstr.append(str(r))
     bname = data['Name']
     banks = dict(zip(regnstr, bname))
-    #print('banks = ')
-    #print(banks)
+    # print('banks = ')
+    # print(banks)
     if zapros in banks:
         otvet = banks[zapros]
     else:
@@ -1926,22 +1983,19 @@ def serv(request, zapros):
 
     msg = 'данные из файла csv получены'
 
-    #return render(request, 'ai/message.html', {'msg': msg, 'regn':regn,'bname':bname,'banks':banks})
+    # return render(request, 'ai/message.html', {'msg': msg, 'regn':regn,'bname':bname,'banks':banks})
     return otvet
-
-
-
 
 
 def mail(request):
     return render(request, 'ai/mail.html')
 
 
-def success(request):
+def success_old(request):
     email = request.POST.get('name', '')
     print('email=')
     print(email)
-    data =    """
+    data = """
     Hello there!
 
     I wanted to personally write an email in order to welcome you to our platform.\
@@ -1959,37 +2013,105 @@ def success(request):
               [email], fail_silently=False)
     msg = 'Сообщение отправлено по e-mail'
 
-    return render(request, 'ai/success.html',{'msg':msg})
+    return render(request, 'ai/success.html', {'msg': msg})
 
 
-def send_codeword(request, codeword):
-        email = user_email(request)
-        print('email=')
-        print(email)
-        data = """
+def success(request):
+
+    email = request.POST.get('name', '')
+    print('email=')
+    print(email)
+
+    message = Mail(
+        from_email = 'info@amelin-gba.com',
+        to_emails = email,
+        subject = 'Sending with Twilio SendGrid is Fun',
+        html_content = '<strong>and easy to do anywhere, even with Python</strong>')
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+        msg = 'Сообщение отправлено по e-mail'
+    except Exception as e:
+
+        print(e.message)
+        msg = e.message
+
+    return render(request, 'ai/success.html', {'msg': msg})
+
+
+def send_codeword_old(request, codeword):
+    email = user_email(request)
+    print('email=')
+    print(email)
+    data = """
         Добрый день!
         
         Вы находитесь в процессе регистрации на сайте amelin-aga.com. Для завершения регистрации Вам понадобится следующее кодовое слово 
         """
-        data += codeword
+    data += codeword
 
-        data2 = """
+    data2 = """
         
         С уважением,
         Аналитическая группа Амелина 
                 """
-        data += data2
+    data += data2
 
-        print('data =')
-        print(data)
+    print('data =')
+    print(data)
 
-        if email != 'no email':
-                send_mail('Welcome!', data, "Yasoob",
-                          [email], fail_silently=False)
-        return email
+    if email != 'no email':
+        send_mail('Welcome!', data, "Yasoob",
+                  [email], fail_silently=False)
+    return email
+
+
+def send_codeword(request, codeword):
+    email = user_email(request)
+    print('email=')
+    print(email)
+    data = """
+        Добрый день!
+
+        Вы находитесь в процессе регистрации на сайте https://agame.pythonanywhere.com. Для завершения регистрации Вам понадобится следующее кодовое слово 
+        """
+    data += codeword
+
+    data2 = """
+
+        С уважением,
+        Аналитическая группа Амелина 
+                """
+    data += data2
+
+    print('data =')
+    print(data)
+
+    if email != 'no email':
+        message = Mail(
+            from_email='info@amelin-gba.com',
+            to_emails=email,
+            subject='Регистрация',
+            html_content = data)
+        try:
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+            msg = 'Сообщение отправлено по e-mail'
+        except Exception as e:
+
+            print(e.message)
+            msg = e.message
+    return email
+
 
 def user_email(request):
-    #по user.id получаем email из связанной с моделью Uesr БД Customerrec
+    # по user.id получаем email из связанной с моделью Uesr БД Customerrec
     X = []
     try:
         a = User.objects.get(id=request.user.id)
@@ -2000,9 +2122,9 @@ def user_email(request):
     print(request.user.first_name)
     print(request.user.last_name)
     print(request.user.id)
-    #customer = a.customer_set.order_by('id')[:]
+    # customer = a.customer_set.order_by('id')[:]
 
-    #for cus in customer:
+    # for cus in customer:
     X.append(a.email)
 
     print('a.email = ')
@@ -2015,9 +2137,9 @@ def user_email(request):
 
     return resp
 
-def codegen_emailsend(request):
 
-    #codeword_2 = str(secrets.token_bytes(16))
+def codegen_emailsend(request):
+    # codeword_2 = str(secrets.token_bytes(16))
     codeword_2 = str(uuid.uuid4())
     email = send_codeword(request, codeword_2)
     un = user_name(request)
@@ -2026,14 +2148,13 @@ def codegen_emailsend(request):
     f.write(codeword_2)
     f.close()
 
-
     if email == 'no email':
         msg = ' отсутствует email - нет возможности отправить Вам кодовое слово /'
     else:
         msg = ' Произведена отправка Вам кодового слова, необходимого для регистрации в системе /'
 
-
     return render(request, 'ai/recvizits.html')
+
 
 def user_name(request):
     # по user.id получаем итя клиента (login) из модели Uesr
@@ -2052,7 +2173,8 @@ def user_name(request):
 
     return resp
 
-#-------------CHANGE PASSWORD--------------------------
+
+# -------------CHANGE PASSWORD--------------------------
 class MyPasswordChangeView(PasswordChangeView):
     template_name = 'ai/password_change_form.html'
     # formclass = AuthUserForm
@@ -2070,7 +2192,8 @@ class MyPasswordChangeDoneView(PasswordChangeDoneView):
     def get_success_url(self):
         return self.success_url
 
-#-------------RESET PASSWORD--------------------------
+
+# -------------RESET PASSWORD--------------------------
 class MyPasswordResetView(PasswordResetView):
     template_name = 'ai/password_reset_form.html'
     email_template_name = 'ai/password_reset_email.html'
@@ -2092,12 +2215,12 @@ class MyPasswordResetDoneView(PasswordResetDoneView):
 
 
 class MyPasswordResetConfirmView(PasswordResetConfirmView):
-        template_name = 'ai/password_reset_confirm.html'
-        # formclass = AuthUserForm
-        success_url = reverse_lazy('ai:password_reset_complete')
+    template_name = 'ai/password_reset_confirm.html'
+    # formclass = AuthUserForm
+    success_url = reverse_lazy('ai:password_reset_complete')
 
-        def get_success_url(self):
-            return self.success_url
+    def get_success_url(self):
+        return self.success_url
 
 
 class MyPasswordResetCompleteView(PasswordResetCompleteView):
@@ -2107,6 +2230,7 @@ class MyPasswordResetCompleteView(PasswordResetCompleteView):
 
     def get_success_url(self):
         return self.success_url
+
 
 def remotecontrol(request):
     X = []
@@ -2133,6 +2257,7 @@ def remotecontrol(request):
     print("hello!")
 
     return resp
+
 
 def control(request):
     print("control")
@@ -2164,8 +2289,6 @@ def control(request):
         dev_2.append(c.dev_2)
         dev_3.append(c.dev_3)
 
-
-
     if len(dev_1) == 0:
         dev_1.append("False")
         dev_2.append("False")
@@ -2174,15 +2297,15 @@ def control(request):
     print('dev_1[-1] = ')
     print(dev_1[-1])
 
-    if dev_1 == False or dev_1 == None :
+    if dev_1 == False or dev_1 == None:
         d1 = 'false'
     else:
         d1 = 'true'
-    if dev_2 == False or dev_2 == None :
+    if dev_2 == False or dev_2 == None:
         d2 = 'false'
     else:
         d2 = 'true'
-    if dev_3 == False or dev_3 == None :
+    if dev_3 == False or dev_3 == None:
         d3 = 'false'
     else:
         d3 = 'true'
@@ -2191,8 +2314,9 @@ def control(request):
     print(d1)
 
     return render(request, 'ai/control.html',
-              {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'user_id': request.user.id,
-               'first_name': request.user.first_name, 'last_name': request.user.last_name})
+                  {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'user_id': request.user.id,
+                   'first_name': request.user.first_name, 'last_name': request.user.last_name})
+
 
 def control_save(request):
     print("control_save")
@@ -2208,23 +2332,23 @@ def control_save(request):
     dev_3 = request.POST.get('device_3')
     print("dev_3 =")
     print(dev_3)
-    #comment = request.POST.get('text')
+    # comment = request.POST.get('text')
     comment = request.POST['text']
     print('comment = ')
     print(comment)
 
     print('user_id = ')
-    print(request.user.id )
+    print(request.user.id)
 
-    if dev_1 == 'false' or dev_1 == None :
+    if dev_1 == 'false' or dev_1 == None:
         d1 = False
     else:
         d1 = True
-    if dev_2 == 'false' or dev_2 == None :
+    if dev_2 == 'false' or dev_2 == None:
         d2 = False
     else:
         d2 = True
-    if dev_3 == 'false' or dev_3 == None :
+    if dev_3 == 'false' or dev_3 == None:
         d3 = False
     else:
         d3 = True
@@ -2232,10 +2356,9 @@ def control_save(request):
     print("d1 =")
     print(d1)
 
-
     now = timezone.now()
-    m = my_control(user_id=request.user.id, dev_1 = d1, dev_2 = d2, dev_3 = d3, comment=comment, phone = '+7 (495) 777-77-77',
-                 datetime = now, identificator = ident )
+    m = my_control(user_id=request.user.id, dev_1=d1, dev_2=d2, dev_3=d3, comment=comment, phone='+7 (495) 777-77-77',
+                   datetime=now, identificator=ident)
     m.save()
     acc = account_check(request)
     return render(request, 'ai/start.html', {'Acc': acc})
@@ -2254,7 +2377,7 @@ def my_condition(request):
     try:
         print("control = ")
         a = my_control.objects.filter(identificator=login)
-        #print(a)
+        # print(a)
     except:
         raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
 
@@ -2265,23 +2388,22 @@ def my_condition(request):
         dev_2.append(c.dev_2)
         dev_3.append(c.dev_3)
 
-    #print ('dev_1[-1] = ')
-    #print(dev_1[-1])
-    #print('dev_2[-1] = ')
-    #print(dev_2[-1])
-    #print('dev_3[-1] = ')
-    #print(dev_3[-1])
+    # print ('dev_1[-1] = ')
+    # print(dev_1[-1])
+    # print('dev_2[-1] = ')
+    # print(dev_2[-1])
+    # print('dev_3[-1] = ')
+    # print(dev_3[-1])
 
-
-    if dev_1 == False or dev_1 == None :
+    if dev_1 == False or dev_1 == None:
         d1 = 'false'
     else:
         d1 = 'true'
-    if dev_2 == False or dev_2 == None :
+    if dev_2 == False or dev_2 == None:
         d2 = 'false'
     else:
         d2 = 'true'
-    if dev_3 == False or dev_3 == None :
+    if dev_3 == False or dev_3 == None:
         d3 = 'false'
     else:
         d3 = 'true'
@@ -2290,9 +2412,10 @@ def my_condition(request):
     print(d1)
     vocab = {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login}
     print(vocab)
-    #return ({'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
-    #return render(request, 'ai/start.html', {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
+    # return ({'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
+    # return render(request, 'ai/start.html', {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'identificator': login})
     return JsonResponse({"key": "value"})
+
 
 def my_condition_2(request):
     # возникает ошибка, если управляющий вектор не задан. Например при первом использовании нового комплекта аппаратуры
@@ -2307,9 +2430,9 @@ def my_condition_2(request):
     dev_3 = []
 
     try:
-        #print("control = ")
+        # print("control = ")
         a = my_control.objects.filter(identificator=login)
-        #print(a)
+        # print(a)
     except:
         raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
 
@@ -2320,23 +2443,22 @@ def my_condition_2(request):
         dev_2.append(c.dev_2)
         dev_3.append(c.dev_3)
 
-    #print ('dev_1[-1] = ')
-    #print(dev_1[-1])
-    #print('dev_2[-1] = ')
-    #print(dev_2[-1])
-    #print('dev_3[-1] = ')
-    #print(dev_3[-1])
+    # print ('dev_1[-1] = ')
+    # print(dev_1[-1])
+    # print('dev_2[-1] = ')
+    # print(dev_2[-1])
+    # print('dev_3[-1] = ')
+    # print(dev_3[-1])
 
-
-    if dev_1[-1] == False or dev_1[-1] == None :
+    if dev_1[-1] == False or dev_1[-1] == None:
         d1 = 'fals'
     else:
         d1 = 'true'
-    if dev_2[-1] == False or dev_2[-1] == None :
+    if dev_2[-1] == False or dev_2[-1] == None:
         d2 = 'fals'
     else:
         d2 = 'true'
-    if dev_3[-1] == False or dev_3[-1] == None :
+    if dev_3[-1] == False or dev_3[-1] == None:
         d3 = 'fals'
     else:
         d3 = 'true'
@@ -2347,17 +2469,16 @@ def my_condition_2(request):
     return (vocab)
 
 
-
 class my_controlView(APIView):
     def get(self, request):
         print("class my_controlView")
         login = request.GET.get('login')
         print("login = ")
         print(login)
-        #my_co = my_control.objects.all()
+        # my_co = my_control.objects.all()
 
         try:
-            print("control = ")
+            #print("control = ")
             a = my_control.objects.filter(identificator=login)
             #print("a = ")
             #print(a)
@@ -2365,31 +2486,31 @@ class my_controlView(APIView):
             #print("my_co = ")
             #print(my_co)
         except:
-            #raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+            # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
             return Response({"my_control": "No data"})
 
         if len(my_co) != 0:
             serializer = my_controlSerializer(my_co, many=True)
-            #print(serializer.data[-1])
+            print("my_control = ")
+            print(serializer.data[-1])
             return Response({"my_control": serializer.data[-1]})
         else:
             return Response({"my_control": "No data"})
 
 
-def my_layout(x,y, x_axis, y_axis, title_name):
-
-    TOOLS="pan,wheel_zoom,box_select,lasso_select,reset"
+def my_layout(x, y, x_axis, y_axis, title_name):
+    TOOLS = "pan,wheel_zoom,box_select,lasso_select,reset"
     p = figure(tools=TOOLS, width=900, height=600, min_border=10, min_border_left=50,
                toolbar_location="above",
-               x_axis_label=x_axis, y_axis_label= y_axis,
+               x_axis_label=x_axis, y_axis_label=y_axis,
                title=title_name)
     p.background_fill_color = "#fafafa"
     r = p.scatter(x, y, size=3, color="#3A5785", alpha=0.6)
 
     # create the horizontal histogram
     hhist, hedges = np.histogram(x, bins=20)
-    hzeros = np.zeros(len(hedges)-1)
-    hmax = max(hhist)*1.1
+    hzeros = np.zeros(len(hedges) - 1)
+    hmax = max(hhist) * 1.1
     LINE_ARGS = dict(color="#3A5785", line_color=None)
     ph = figure(toolbar_location=None, width=p.width, height=250, x_range=p.x_range,
                 y_range=(-hmax, hmax), min_border=10, min_border_left=50, y_axis_location="right")
@@ -2416,7 +2537,6 @@ def my_layout(x,y, x_axis, y_axis, title_name):
     vh1 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.5, **LINE_ARGS)
     vh2 = pv.quad(left=0, bottom=vedges[:-1], top=vedges[1:], right=vzeros, alpha=0.1, **LINE_ARGS)
 
-
     layout = gridplot([[p, pv], [ph, None]], merge_tools=False)
     return layout
 
@@ -2430,9 +2550,9 @@ def fancy_dendrogram(*args, **kwargs):
     ddata = dendrogram(*args, **kwargs)
 
     if not kwargs.get('no_plot', False):
-        #fig = plt.figure(figsize=(10, 8)) # после того как убрал это оператор стало выводиться дерево (дендрограмма), до этого выводилась только рамка
-        #fig = plt.figure()
-        #ax = fig.add_subplot(111)
+        # fig = plt.figure(figsize=(10, 8)) # после того как убрал это оператор стало выводиться дерево (дендрограмма), до этого выводилась только рамка
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111)
         plt.title('Дендрограмма')
         plt.xlabel('sample index or (clastr size)')
         plt.ylabel('distance')
@@ -2442,13 +2562,13 @@ def fancy_dendrogram(*args, **kwargs):
             if y > annotate_above:
                 plt.plot(x, y, 'o', c=c)
             plt.annotate("%.3g" % y, (x, y), xytext=(0, -5),
-                             textcoords='offset points',
-                             va='top', ha='center')
+                         textcoords='offset points',
+                         va='top', ha='center')
 
         if max_d:
             plt.axhline(y=max_d, c='k')
 
-    #plt.tight_layout()
+    # plt.tight_layout()
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
@@ -2460,3 +2580,131 @@ def fancy_dendrogram(*args, **kwargs):
     graphic = graphic.decode('utf-8')
 
     return graphic
+
+
+def test_js(request):
+    return render(request, 'ai/test_js.html')
+
+def test_js2(request):
+    return render(request, 'ai/test_js2.html')
+
+#def test_js3(request):
+    #    meter_title = 'Francheska'
+    #chisizm = 1000
+    #return render(request, 'ai/test_js3.html', {'meter_title': meter_title, 'chisizm': chisizm})
+
+def test_js3(request, meter_title, chisizm):
+
+    return render(request, 'ai/test_js3.html', {'meter_title': meter_title, 'chisizm': chisizm})
+
+class my_dataView(APIView):
+    def get(self, request):
+        print("class my_dataView")
+        login = request.GET.get('login')
+        meter_title = request.GET.get('meter_title')
+        chisizm = int(request.GET.get('chisizm'))
+        # p = request.GET.get('param')
+        p = 5
+        print("login=")
+        print(login)
+        print("meter_title=")
+        print(meter_title)
+        print("chisizm=")
+        print(chisizm)
+        voc = get_ident(request)
+        print('voc = ')
+        print(voc)
+        ident = voc['ident']
+        print('ident = ')
+        print(ident)
+
+
+
+        try:
+            print('try')
+            q = Metering.objects.filter(meter_title=meter_title, meter_identificator=str(ident))
+            print('q =')
+
+        except:
+            print('except:')
+            # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+            return Response({"my_data_try": "No data"})
+
+
+        print('до my_data')
+        my_data = q.order_by('-meter_datetime')[:chisizm]
+        print('после my_data')
+
+        x0 = []
+        y1 = []
+        y2 = []
+        y4 = []
+        # d = []
+        number = []
+        i = 1
+        # format = '%b %d %Y %I:%M%p' # Формат
+        format = '%H:%M'  # Формат
+
+        for data in my_data:
+            x0.append(data.meter_datetime)
+            y1.append(data.meter_temperature)
+            y2.append(data.meter_humidity)
+            y4.append(data.meter_CO2)
+            number.append(i)
+            i = i + 1
+
+        name_cow = data.meter_title
+        print(name_cow)
+
+        # result =np.column_stack((latest_data_list, number))
+
+        if name_cow == 'Yarushka':
+            nabobj_name = 'Объект 1'
+            gas_name = 'LPG'
+        elif name_cow == 'Mumuka':
+            nabobj_name = 'Объект 2'
+            gas_name = 'CO2'
+        elif name_cow == 'Francheska':
+            nabobj_name = 'Объект 3'
+            gas_name = 'LPG'
+        elif name_cow == 'Buryonka':
+            nabobj_name = 'Объект 4'
+            gas_name = 'Smoke gas'
+        elif name_cow == 'Vestka':
+            nabobj_name = 'Объект 5'
+            gas_name = 'CH4'
+        else:
+            nabobj_name = 'Объект NoName'
+            gas_name = 'UnKnown gas'
+
+        print(nabobj_name)
+
+        x1 = range(len(y1))
+        print(len(y1))
+
+        # Формируем список с обратной последовательностью
+        y10 = y1[::-1]
+        y20 = y2[::-1]
+        y40 = y4[::-1]
+        x10 = x0[::-1]
+        print('p =')
+        print(p)
+        param = int(p)
+        print(param)
+        res = y10
+        if (param // 3) == 0:
+            res = y10
+        if (param // 3) == 1:
+            res = y20
+        if (param // 3) == 2:
+            res = y40
+
+        if len(my_data) != 0:
+            print("len(my_data)= ")
+            print(len(my_data))
+            # print(y40)
+            res = y10 + y20 + y40
+
+            return Response(res)
+        else:
+            return Response({"my_data": "No data"})

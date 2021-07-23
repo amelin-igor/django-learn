@@ -38,18 +38,23 @@ urlpatterns = [
     path('mail/', views.mail, name='mail_page'),
     path('success/', views.success, name='mail_success_page'),
     path('codegen_emailsend/', views.codegen_emailsend, name='codegen_emailsend_page'),
-
     path('password-reset/', views.MyPasswordResetView.as_view(), name='password_reset'),
     path('password-reset/done/', views.MyPasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', views.MyPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', views.MyPasswordResetCompleteView.as_view(), name='password_reset_complete'),
-
     path('password-change/', views.MyPasswordChangeView.as_view(), name='password_change'),
     path('password-change/done/', views.MyPasswordChangeDoneView.as_view(), name='password_change_done'),
     path('control/', views.control, name='control_page'),
     path('control_save/', views.control_save, name='control_save_page'),
     path('my_condition/', views.my_condition, name='my_condition_page'),
     path('my_control/', views.my_controlView.as_view(), name='my_control_page'),
+    path('test_js/', views.test_js, name='test_js_page'),
+    path('test_js2/', views.test_js2, name='test_js_page2'),
+    # path('test_js3/', views.test_js3, name='test_js3_page'),
+
+    path('test_js3/<str:meter_title>/<int:chisizm>/', views.test_js3, name='test_js3_page'),
+
+    path('my_data/', views.my_dataView.as_view(), name='my_data_page'),
 
 ]
 

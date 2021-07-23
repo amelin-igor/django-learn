@@ -1,0 +1,86 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>AGA Sensors</title>
+
+	<link href="{% static 'ai/examples.css'%}" rel="stylesheet" type="text/css">
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.canvaswrapper.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.colorhelpers.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.flot.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.flot.saturated.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.flot.browser.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.flot.drawSeries.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/jquery.flot.uiConstants.js' %}"></script>
+	<script language="javascript" type="text/javascript" src="{% static 'ai/source/my_script_2.js' %}" param_a = "{{meter_title}}" param_b = "{{chisizm}}" ></script>
+
+
+</head>
+<body>
+{{meter_title}}
+{{chisizm}}
+
+	<h3>Наблюдаемый объект {{meter_title}} </h3>
+	<br>
+	<hr />
+
+	<div id="header">
+		<h4>Текущие значения температуры, (<sup>o</sup>C) </h4>
+	</div>
+
+	<div id="content">
+
+		<div class="demo-container">
+			<div id="placeholder" class="demo-placeholder"></div>
+		</div>
+
+		<h4>Текущие значения влажности, (%) </h4>
+
+
+		<div class="demo-container">
+			 <div id="placeholder_2" class="demo-placeholder"></div>
+		</div>
+
+		<h4>Текущие значения концентрации газа, ppm</h4>
+
+		 <div class="demo-container">
+			 <div id="placeholder_3" class="demo-placeholder"></div>
+		 </div>
+
+		<p>Legend Container:</p>
+        <div id="legendContainer" class="legend" style="width:9em;height:8em;border-style:solid;border-color:threedface"></div>
+
+        <div>
+            <fieldset id="myForm">
+                <legend>Legend Position</legend>
+                <input type="radio" name="myRadio" value="se"> SE - Over Graph <br>
+                <input type="radio" name="myRadio" value="sw"> SW - Over Graph <br>
+                <input type="radio" name="myRadio" value="ne"> NE - Over Graph <br>
+                <input type="radio" name="myRadio" value="nw"> NW - Over Graph <br>
+                <input type="radio" name="myRadio" value="container" checked="checked"> Container <br>
+            </fieldset>
+        </div>
+
+
+		<p>Здесь можно наблюдать значения измеряемых параметров в реальном времени </p>
+
+		<p>Данные обновляются автоматически</p>
+
+	</div>
+
+
+
+
+
+	<div id="footer">
+		Copyright &copy; 2021 ООО Amelina Analytical Group
+	</div>
+
+
+
+</body>
+</html>
