@@ -2454,7 +2454,7 @@ def fancy_dendrogram(*args, **kwargs):
     buffer.seek(0)
     image_png = buffer.getvalue()
     buffer.close()
-    plt.close()
+    plt.close()  # после включения этого оператора ушла ошибка
 
     graphic = base64.b64encode(image_png)
     graphic = graphic.decode('utf-8')
