@@ -635,11 +635,15 @@ def nabobj(request):
     print(ident)
     # cow_metering_list = Metering.objects.all()
     cow_metering_list = Metering.objects.filter(meter_identificator=ident)
+
     X = []
     for cow in cow_metering_list:
         X.append(cow.meter_title)
     XM = set(X)
     y = sorted(list(XM))
+    print('sorted(list(XM))=')
+    print(y)
+
     return render(request, 'ai/nabobj.html', {'cow_metering_list': y})
 
 
@@ -2430,43 +2434,48 @@ def my_condition_2(request):
     dev_3 = []
 
     try:
-        # print("control = ")
+        print("control = ")
         a = my_control.objects.filter(identificator=login)
-        # print(a)
+        print(a)
+        control = a.order_by('id')
+
+        for c in control:
+            dev_1.append(c.dev_1)
+            dev_2.append(c.dev_2)
+            dev_3.append(c.dev_3)
+
+        # print ('dev_1[-1] = ')
+        # print(dev_1[-1])
+        # print('dev_2[-1] = ')
+        # print(dev_2[-1])
+        # print('dev_3[-1] = ')
+        # print(dev_3[-1])
+
+        if dev_1[-1] == False or dev_1[-1] == None:
+            d1 = 'fals'
+        else:
+            d1 = 'true'
+        if dev_2[-1] == False or dev_2[-1] == None:
+            d2 = 'fals'
+        else:
+            d2 = 'true'
+        if dev_3[-1] == False or dev_3[-1] == None:
+            d3 = 'fals'
+        else:
+            d3 = 'true'
+
+        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login}
+        print("my_condition_2.vocab = ")
+        print(vocab)
+        return (vocab)
     except:
-        raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+        # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
+        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login}
+        print('my_condition_2.except:')
+        print(vocab)
+        return (vocab)
 
-    control = a.order_by('id')
 
-    for c in control:
-        dev_1.append(c.dev_1)
-        dev_2.append(c.dev_2)
-        dev_3.append(c.dev_3)
-
-    # print ('dev_1[-1] = ')
-    # print(dev_1[-1])
-    # print('dev_2[-1] = ')
-    # print(dev_2[-1])
-    # print('dev_3[-1] = ')
-    # print(dev_3[-1])
-
-    if dev_1[-1] == False or dev_1[-1] == None:
-        d1 = 'fals'
-    else:
-        d1 = 'true'
-    if dev_2[-1] == False or dev_2[-1] == None:
-        d2 = 'fals'
-    else:
-        d2 = 'true'
-    if dev_3[-1] == False or dev_3[-1] == None:
-        d3 = 'fals'
-    else:
-        d3 = 'true'
-
-    vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login}
-    print("my_condition_2.vocab = ")
-    print(vocab)
-    return (vocab)
 
 
 class my_controlView(APIView):
