@@ -479,7 +479,7 @@ def starter(request, meter_title, chisizm):
     corr_h_g = toFixed(corr_h_g, 4)
     corr_t_h_g = np.corrcoef([y10, y20, y40])
 
-    if len(y1) > 1000:
+    if len(y1) > 900:
 
         data_for_clust = np.column_stack((y10, y20, y40))
         dataNorm = preprocessing.scale(data_for_clust)
@@ -2436,7 +2436,7 @@ def my_condition_2(request):
     try:
         print("control = ")
         a = my_control.objects.filter(identificator=login)
-        print(a)
+        #print(a)
         control = a.order_by('id')
 
         for c in control:
