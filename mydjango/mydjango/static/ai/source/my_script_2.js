@@ -34,7 +34,7 @@
 		function getData(){
 			// alert('getData');
 			// oReq.open("GET", "http://192.168.1.49:8000/my_data?login=00001&meter_title="+cow_name+"&chisizm="+String(chizm)+"&param="+String(param));
-			oReq.open("GET", "https://agame.pythonanywhere.com/?login=00001&meter_title="+cow_name+"&chisizm="+String(chizm)+"&param="+String(param));
+			oReq.open("GET", "https://agame.pythonanywhere.com/my_data?login=00001&meter_title="+cow_name+"&chisizm="+String(chizm)+"&param="+String(param));
 			
 			oReq.responseType = 'json';
 			oReq.send();
