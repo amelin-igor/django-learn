@@ -313,7 +313,7 @@ def starter(request, meter_title, chisizm):
 
     print(now)
 
-    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=183)).delete()
+    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=90)).delete()
     now = timezone.now()
     print(now)
 
@@ -872,6 +872,7 @@ def pdcalc(request):
         '40': '1/07/2020',
         '41': '1/10/2020',
         '42': '1/01/2021',
+        '43': '1/04/2021',
     }
 
     Dat2 = {
@@ -919,38 +920,43 @@ def pdcalc(request):
         '39': '1/10/2020',
         '40': '1/01/2021',
 
-        '41': '1/04/2014',
-        '42': '1/07/2014',
-        '43': '1/10/2014',
-        '44': '1/01/2015',
-        '45': '1/04/2015',
-        '46': '1/07/2015',
-        '47': '1/10/2015',
-        '48': '1/01/2016',
-        '49': '1/04/2016',
-        '50': '1/07/2016',
-        '51': '1/10/2016',
-        '52': '1/01/2017',
-        '53': '1/04/2017',
-        '54': '1/07/2017',
-        '55': '1/10/2017',
-        '56': '1/01/2018',
-        '57': '1/04/2018',
-        '58': '1/07/2018',
-        '59': '1/10/2018',
-        '60': '1/01/2019',
-        '61': '1/04/2019',
-        '62': '1/07/2019',
-        '63': '1/10/2019',
-        '64': '1/01/2020',
-        '65': '1/04/2020',
-        '66': '1/07/2020',
-        '67': '1/10/2020',
-        '68': '1/01/2021',
-        '69': '1/04/2021',
-        '70': '1/07/2021',
-        '71': '1/10/2021',
-        '72': '1/01/2022',
+        '41': '1/04/2021',
+        '42': '1/07/2021',
+        '43': '1/10/2021',
+        '44': '1/01/2022',
+
+        '45': '1/04/2022',
+        '46': '1/07/2022',
+        '47': '1/10/2022',
+        '48': '1/01/2023',
+        '49': '1/04/2023',
+        '50': '1/07/2023',
+        '51': '1/10/2023',
+        '52': '1/01/2024',
+        '53': '1/04/2024',
+        '54': '1/07/2024',
+        '55': '1/10/2024',
+
+        '56': '1/01/2025',
+        '57': '1/04/2025',
+        '58': '1/07/2025',
+        '59': '1/10/2025',
+
+        '60': '1/01/2026',
+        '61': '1/04/2026',
+        '62': '1/07/2026',
+        '63': '1/10/2026',
+
+        '64': '1/01/2027',
+        '65': '1/04/2027',
+        '66': '1/07/2027',
+        '67': '1/10/2027',
+
+        '68': '1/01/2028',
+        '69': '1/04/2028',
+        '70': '1/07/2028',
+        '71': '1/10/2028',
+        '72': '1/01/2029',
 
     }
 
@@ -1033,28 +1039,53 @@ def pdcalc(request):
 
     }
 
-    name = serv(request, str(regn))
-    # data = pd.read_csv("Train4-X42-b60-D38B.csv", sep=';')
-    # data.describe()
-    # y = data['43']
-    # X = data.drop('43', axis=1)
-    # X = X.apply(pd.to_numeric)
-    # scaler = StandardScaler(copy=False).fit(X)
-    # X_train = scaler.transform(X)
-    # scaler_filename = "scaler_x42a.save"
-    # joblib.dump(scaler, scaler_filename)
-
     # файл для шкалирования (стандартизации) нужно делать в этой процедуре (файл шкалирования из Jupyter Notebook не подходит
-    # data = pd.read_csv("Train-XXX+47_D41B.csv", sep=';')
-    # X = data
-    # cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33', '34',
-    #        '38', '39', '40', '41', '42', '43', '44', '45', '46', '48']
-    # X.drop(cols, axis=1, inplace=True)
-    # X = X.apply(pd.to_numeric)
-    # scaler = StandardScaler(copy=False).fit(X)
-    # X_train = scaler.transform(X)
-    # scaler_filename = "scaler_x20a.save"
-    # joblib.dump(scaler, scaler_filename)
+    #data = pd.read_csv("M2B_PCZ20210216_B.csv", sep=';')
+    #df6 = data[2600:10000]
+    #df7 = data[10000:]
+    #frames = [df6, df7]
+    #df = pd.concat(frames)
+    #print('df.shape = ')
+    #print(df.shape)
+    #df = df.dropna(how='all')
+    #print('df.shape(after dropna) = ')
+    #print(df.shape)
+    # -----------------------------------------------'
+    #count = []
+    #num_in_diap = []
+    ## число диапазонов n
+    #n = 100
+    #shag = 1 / n
+
+    #for i in range(n + 2):
+    #    count.append(0)
+
+    #def rasp(count):
+    #    for p in df['52']:
+    #        # цикл по диапазонам
+    #        for i in range(n + 2):
+    #            if p >= i * shag and p < (i + 1) * shag:
+    #                count[i] = count[i] + 1
+    #                num_in_diap.append(count[i])
+    #    return count
+
+    #rasp(count)
+
+    #df = df.assign(num_in_diap=num_in_diap)
+    #df = df[df.num_in_diap < 125]
+    # -----------------------------------------------'
+    #colsm = []
+    #for i in range(1, 52):
+    #    colsm.append(str(i))
+
+    #y = df['52']
+    #X = df[colsm]
+
+    #X = X.apply(pd.to_numeric)
+    #scaler = StandardScaler(copy=False).fit(X)
+    #X_train = scaler.transform(X)
+    #scaler_filename = "scaler_x69a.save"
+    #joblib.dump(scaler, scaler_filename)
 
     now = timezone.now()
     print('pdcalc')
@@ -1101,9 +1132,9 @@ def pdcalc(request):
         mes = 'Не достаточно средств на текущем счете - пополните депозит'
         return render(request, 'ai/deposit.html', mes=mes)
     else:
-        mod = "model_X20_jpt22"
-
+        # mod = "model_X20_jpt22"
         # mod = "model_X51PCZ_37"
+        mod = "model_X51PCZ_38F"  # 20210810 нормализованное распределение
         # if regn in bank:
         #    name = bank[regn]
         # else:
@@ -1113,7 +1144,7 @@ def pdcalc(request):
         # Пересоздаем ту же самую модель, включая веса и оптимизатор.
         def mean_pred2(y_true, y_pred):
             a = abs(y_true - y_pred)
-            a = 1 - a
+            #a = 1 - a
             return a
 
         get_custom_objects().update({"mean_pred": mean_pred2})
@@ -1121,82 +1152,102 @@ def pdcalc(request):
 
         model = keras.models.load_model(mod + '.h5', custom_objects={"mean_pred": mean_pred2})
         print("keras.models.load_model...")
-        scaler_filename = "scaler_x20a.save"
+        scaler_filename = "scaler_x69a.save"
         print(scaler_filename)
         scaler = joblib.load(scaler_filename)
         print("scaler = joblib.load...")
-        txt = regn
+        txt = str(regn)
         print("txt =")
         print(txt)
-        # wayf='D:\TEMP2\CSV\X42\Testob-' + str(regn) + 'A42.csv'
-        wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'A42.csv'
+        name = serv(request, txt)
+
+        #wayf = "Testob-" + txt + "PCZ69A.csv"
+        wayf = "D:/TEMP2/CSV/Testob-" + txt + "PCZ69A.csv"
+        wayf_1 = "D:/TEMP2/CSV/Testob-" + txt + "PCZ69.csv"
+        wayf_2 = "D:/TEMP2/CSV/Testob-" + txt + "A51.csv"
+        wayf_3 = "D:/TEMP2/CSV/Testob-" + txt + "PCZ51.csv"
+
         check_file = os.path.exists(wayf)
-        print(check_file)
-        print(wayf)
-        if not check_file:
-            wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'A51.csv'
-            # wayf = 'D:\TEMP2\CSV\Testob-' + str(regn) + 'PCZ69.csv'
-            check_file = os.path.exists(wayf)
-            print(check_file)
-            print(wayf)
-            # cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-            #       '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
-            cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46', '48', '49', '50', '51']
+        check_file_1 = os.path.exists(wayf_1)
+        check_file_2 = os.path.exists(wayf_2)
+        check_file_3 = os.path.exists(wayf_3)
 
-            Dat = Dat2
+        if check_file:
+            data2 = pd.read_csv(wayf, sep=',')
+            print("Используются данные >> " + wayf)
+        elif check_file_1:
+            data2 = pd.read_csv(wayf_1, sep=',')
+            print("Используются данные >> " + wayf_1)
+        elif check_file_2:
+            data2 = pd.read_csv(wayf_2, sep=',')
+            print("Используются данные >> " + wayf_2)
+        elif check_file_3:
+            data2 = pd.read_csv(wayf_3, sep=',')
+            print("Используются данные >> " + wayf_3)
         else:
+            print("Нет данных")
+            name = "Нет данных"
+        Dat = Dat2
 
-            cols = ['3', '7', '8', '9', '13', '18', '19', '20', '21', '22', '23', '24', '25', '27', '29', '32', '33',
-                    '34', '38', '39', '40', '41', '42', '43', '44', '45', '46']
-            Dat = Dat1
+        print(check_file)
+        print(check_file_1)
+        print(check_file_2)
+        print(check_file_3)
 
-        info = 'Ответ сети: Расчет не возможен - отсутствует отчетность банка ' + name + ' (лицензия №' + regn + ')'
-        if not check_file:
+
+        info = 'Ответ сети: расчет невозможен - отсутствует отчетность банка ' + name + ' (лицензия №' + regn + ')'
+        if not (check_file or check_file_1 or check_file_2 or check_file_3):
             return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info': info})
 
-        data2 = pd.read_csv(wayf, sep=',')
+        #data2 = pd.read_csv(wayf, sep=',')
+        #print('data2[1][1]=')
+        #print(data2['1'][1])
+
         ds2 = data2.shape[1]
         if ds2 == 56:
-            cols = cols + ['52', '53', '54', '55', '56']
-
-        X_new1 = data2
-
-        X_new1.drop(cols, axis=1, inplace=True)
-        ds2 = data2.shape[0]
-        if ds2 == 69:
-            X_new1 = data2[29:]
-        elif ds2 == 68:
-            X_new1 = data2[29:]
+            cols = ['52', '53', '54', '55', '56']
         else:
-            X_new1 = data2[1:]
+            cols = []
 
-        print('data2[:5]=')
-        print(data2[:5])
+        data2.drop(cols, axis=1, inplace=True)
 
-        print('X_new1[1:5]=')
-        print(X_new1[1:5])
-        print('X_new1.shape[1] = ')
-        print(X_new1.shape[1])
+        ds2 = data2.shape[0]
+        if ds2 >= 41:
+            X_new1 = data2[ds2 - 41:]
+        else:
+            X_new1 = data2
+        # начальный элемент после отбрасывания старых данных, т.е. с какой строки (индекса) начинают X_new1
+        nachelem = ds2 - 41
 
-        if X_new1.shape[1] != 20:
+        print('nachelem = ')
+        print(nachelem)
+
+        #print('data2[:]=')
+        #print(data2[:])
+
+        #print('X_new1[:]=')
+        #print(X_new1[:])
+
+        #print('X_new1.shape[1] = ')
+        #print(X_new1.shape[1])
+        #print('X_new1.shape[0] = ')
+        #print(X_new1.shape[0])
+
+
+        if X_new1.shape[1] != 51:
+            print('X_new1.shape[1] != 51')
             return render(request, 'ai/pdstart.html', {'Acc': X[-1], 'info': info})
 
         X_new1 = X_new1.apply(pd.to_numeric)
-        print('после pd.to_numeric X_new[1:5]=')
-        print(X_new1[1:5])
-
+        X_new2 = X_new1.copy()
+        #print("X_new1['35'][10] = ")
+        #print(X_new1['35'][10])
         X_new = scaler.transform(X_new1)
-        ChDat = X_new.shape[0]
-        print('X_new[1]=')
-        print(X_new[1])
-        print('len(X_new[1]) = ')
-        print(len(X_new[1]))
+        #print("X_new1['35'][10](after scale) = ")
+        #print(X_new1['35'][10])
 
         # расчет предсказания
         predictions = model.predict(X_new)
-        # ChDat = 41
-        # ChDat = len(X_new[1])
         # определяем число строк в массиве X_new
         ChDat = X_new.shape[0]
 
@@ -1221,6 +1272,7 @@ def pdcalc(request):
         # если время до дефолта не сильно (не более 3 лет) отличается от время до дефолта (фильтр), то прогноз стабильный
 
         y1 = tmp.ravel()
+
         i = 0
         y3 = vdd.ravel()
         y2 = []
@@ -1333,79 +1385,109 @@ def pdcalc(request):
         # data2 = data2.apply(pd.to_numeric)
         # print('data2 =')
         # print(data2)
-        z1 = data2['1']
-        z2 = data2['2']
-        z4 = data2['4']
-        z5 = data2['5']
-        z6 = data2['6']
-        z10 = data2['10']
-        z11 = data2['11']
-        z12 = data2['12']
-        z14 = data2['14']
-        z15 = data2['15']
-        z16 = data2['16']
-        z17 = data2['17']
+        # z1 = X_new1['1']
+        # z2 = X_new1['2']
+        # z4 = X_new1['4']
+        # z5 = X_new1['5']
+        # z6 = X_new1['6']
+        # z10 = X_new1['10']
+        # z11 = X_new1['11']
+        # z12 = X_new1['12']
+        # z14 = X_new1['14']
+        # z15 = X_new1['15']
+        # z16 = X_new1['16']
+        # z17 = X_new1['17']
 
-        z26 = data2['26']
-        z28 = data2['28']
-        z30 = data2['30']
-        z31 = data2['31']
-        print('z31=')
-        print(z31)
-        z35 = data2['35']
-        z36 = data2['36']
-        z37 = data2['37']
-        z47 = data2['47']
+        # z26 = X_new1['26']
+        # z28 = X_new1['28']
+        # z30 = X_new1['30']
+        # z31 = X_new1['31']
+        #print('z31=')
+        #print(z31)
+        # z35 = X_new1['35']
+        # z36 = X_new1['36']
+        # z37 = X_new1['37']
+        # z47 = X_new1['47']
 
         print('len(x) = ', len(x))
         tab = []
         tab2 = []
         otchetnost_full = []
-        for i in range(len(x)):
-            # print('i =', i )
-            # print('Dat =', Dat[str(i)])
-            y1[i] = toFixed(y1[i], 10)
-            y2[i] = toFixed(y2[i], 10)
-            y4[i] = toFixed(y4[i], 1)
-            z1[i] = float(toFixed(data2['1'][i], 5))  # уровень просроченных процентов
-            z2[i] = float(toFixed(data2['2'][i], 5))  # Общая срочная КА
-            z4[i] = float(toFixed(data2['4'][i], 5))  # уровень риска активов
-            z5[i] = float(toFixed(data2['5'][i], 5))  # уровень риска капитала
-            z6[i] = float(toFixed(data2['6'][i], 5))  # время оборачиваемости кп
-            z10[i] = float(toFixed(data2['10'][i], 5))  # ЛАМ / Активы
-            z11[i] = float(toFixed(data2['11'][i], 5))  # Прибыль / Активы
-            z12[i] = float(toFixed(data2['12'][i], 5))  # Прибыль / Капитал
-            z14[i] = float(toFixed(data2['14'][i], 5))  # Коэфф. замещения
-            z15[i] = float(toFixed(data2['15'][i], 5))  # E_int
-            z16[i] = float(toFixed(data2['16'][i], 5))  # H12
-            z17[i] = float(toFixed(data2['17'][i], 5))  # E_pr / E_int
+        z1=[]
+        z2 = []
+        z3 = []
+        z4 = []
+        z5 = []
+        z6 = []
+        z10 = []
+        z11 = []
+        z12 = []
+        z14 = []
+        z15 = []
+        z16 = []
+        z17 = []
+        z26 = []
+        z28 = []
+        z30 = []
+        z31 = []
+        z35 = []
+        z36 = []
+        z37 = []
+        z47 = []
 
-            z26[i] = float(toFixed(z26[i], 5))  # Норматив H7
-            z28[i] = float(toFixed(z28[i], 5))  # Норматив H10_1
-            z30[i] = float(toFixed(z30[i], 5))  # Средства граждан / активы
-            z31[i] = float(toFixed(z31[i], 5))  # Доля активов в системе
-            z35[i] = float(toFixed(z35[i], 5))  # фактор V1
-            z36[i] = float(toFixed(z36[i], 5))  # фактор V2
-            z37[i] = float(toFixed(z37[i], 5))  # фактор V3
-            z47[i] = float(toFixed(z47[i], 5))  # доля МБК в активах
 
-            if (z12[i] == 0 and z5[i] == 5) or (z2[i] == 0 and z4[i] == 0):
 
+        for i in range(nachelem, len(x)+ nachelem):
+            #print('i =', i )
+            #print('Dat =', Dat[str(i)])
+
+            y1[i-nachelem] = toFixed(y1[i-nachelem], 10)
+            y2[i-nachelem] = toFixed(y2[i-nachelem], 10)
+            y4[i-nachelem] = toFixed(y4[i-nachelem], 1)
+
+            z1.append(float(toFixed(X_new2['1'][i], 5)))    # уровень просроченных процентов
+            z2.append(float(toFixed(X_new2['2'][i], 5)))   # Общая срочная КА
+            z4.append(float(toFixed(X_new2['3'][i], 5)))   # уровень риска активов
+            z5.append(float(toFixed(X_new2['5'][i], 5)))    # уровень риска капитала
+            z6.append(float(toFixed(X_new2['6'][i], 5)))    # время оборачиваемости кп
+            z10.append(float(toFixed(X_new2['10'][i], 5)))    # ЛАМ / Активы
+            z11.append(float(toFixed(X_new2['11'][i], 5)))   # Прибыль / Активы
+            z12.append(float(toFixed(X_new2['12'][i], 5)))   # Прибыль / Капитал
+            z14.append(float(toFixed(X_new2['14'][i], 5)))   # Коэфф. замещения
+            z15.append(float(toFixed(X_new2['15'][i], 5)))   # E_int
+            z16.append(float(toFixed(X_new2['16'][i], 5)))   # H12
+            z17.append(float(toFixed(X_new2['17'][i], 5)))   # E_pr / E_int
+
+            z26.append(float(toFixed(X_new2['26'][i], 5)) )  # Норматив H7
+            z28.append(float(toFixed(X_new2['28'][i], 5)))   # Норматив H10_1
+            z30.append(float(toFixed(X_new2['30'][i], 5)))   # Средства граждан / активы
+            z31.append(float(toFixed(X_new2['31'][i], 5)))   # Доля активов в системе
+            z35.append(float(toFixed(X_new2['35'][i], 5)))   # фактор V1
+            z36.append(float(toFixed(X_new2['36'][i], 5)))   # фактор V2
+            z37.append(float(toFixed(X_new2['37'][i], 5)))  # фактор V3
+            z47.append(float(toFixed(X_new2['47'][i], 5)))   # доля МБК в активах
+
+            if (z12[-1] == 0 and z5[-1] == 5) or (z2[-1] == 0 and z4[-1] == 0):
+            # if (X_new1['12'][i] == 0 and X_new1['5'][i] == 5) or (X_new1['2'][i] == 0 and X_new1['4'][i] == 0):
+
+                print('z12[-1] = ', z12[-1])
+                print('z5[-1] = ', z5[-1])
+                print('z2[-1] = ', z2[-1])
+                print('z4[-1] = ', z4[-1])
+                print('z35[-1] = ', z35[-1])
                 otchetnost_full.append('false')
                 print('otchetnost_full = false')
             else:
                 otchetnost_full.append('true')
-
-            print('z14 =')
-            print(z14[i])
+                print('z35[-1] = ', z35[-1])
 
             # x-номер квартала
-            row = [x[i], y1[i], y2[i], Dat[str(i)], y5[i], y6[i], y4[i], otchetnost_full[i]]
+            row = [x[i-nachelem], y1[i-nachelem], y2[i-nachelem], Dat[str(i)], y5[i-nachelem], y6[i-nachelem], y4[i-nachelem], otchetnost_full[i-nachelem]]
             tab.append(row)
             row = [
-                x[i], Dat[str(i)], z1[i], z2[i], z4[i], z5[i], z6[i], z10[i], z11[i], z12[i], z14[i], z15[i], z16[i],
-                z17[i],
-                z26[i], z28[i], z30[i], z31[i], z35[i], z36[i], z37[i], z47[i]
+                x[i-nachelem], Dat[str(i)], z1[-1], z2[-1], z4[-1], z5[-1], z6[-1], z10[-1], z11[-1], z12[-1], z14[-1], z15[-1], z16[-1],
+                z17[-1],
+                z26[-1], z28[-1], z30[-1], z31[-1], z35[-1], z36[-1], z37[-1], z47[-1]
             ]
             tab2.append(row)
 
@@ -1459,39 +1541,39 @@ def pdcalc(request):
             'доля МБК в активах',
 
         ]
-
+        nachdat = Dat[str(nachelem)]
         plot = figure(
             title='Вероятность дефолта банка ' + name,
             plot_width=900,
             tools="pan, box_zoom, reset, save",
-            x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
+            x_axis_label='номер квартала начиная с '+ nachdat, y_axis_label='Вероятность дефолта'
         )
         plot.line(x, y1, legend_label="вероятность дефолта", line_color="red")
         plot.line(x, y2, legend_label="вероятность дефолта фильтр", line_color="blue")
         script, div = components(plot)
         # -----------------график 2-----------------------------------------------------------------------------
 
-        script2, div2 = components(myplot(request, x, y1, z14, pokaz[10], name))
-        script3, div3 = components(myplot(request, x, y1, z15, pokaz[11], name))
+        script2, div2 = components(myplot(request, x, y1, z14, pokaz[10], name, nachdat))
+        script3, div3 = components(myplot(request, x, y1, z15, pokaz[11], name, nachdat))
 
-        script4, div4 = components(myplot(request, x, y1, z1, pokaz[2], name))
-        script5, div5 = components(myplot(request, x, y1, z2, pokaz[3], name))
-        script6, div6 = components(myplot(request, x, y1, z4, pokaz[4], name))
-        script7, div7 = components(myplot(request, x, y1, z5, pokaz[5], name))
-        script8, div8 = components(myplot(request, x, y1, z6, pokaz[6], name))
-        script9, div9 = components(myplot(request, x, y1, z10, pokaz[7], name))
-        script10, div10 = components(myplot(request, x, y1, z11, pokaz[8], name))
-        script11, div11 = components(myplot(request, x, y1, z12, pokaz[9], name))
-        script12, div12 = components(myplot(request, x, y1, z16, pokaz[12], name))
-        script13, div13 = components(myplot(request, x, y1, z17, pokaz[13], name))
-        script14, div14 = components(myplot(request, x, y1, z26, pokaz[14], name))
-        script15, div15 = components(myplot(request, x, y1, z28, pokaz[15], name))
-        script16, div16 = components(myplot(request, x, y1, z30, pokaz[16], name))
-        script17, div17 = components(myplot(request, x, y1, z31, pokaz[17], name))
-        script18, div18 = components(myplot(request, x, y1, z35, pokaz[18], name))
-        script19, div19 = components(myplot(request, x, y1, z36, pokaz[19], name))
-        script20, div20 = components(myplot(request, x, y1, z37, pokaz[20], name))
-        script21, div21 = components(myplot(request, x, y1, z47, pokaz[21], name))
+        script4, div4 = components(myplot(request, x, y1, z1, pokaz[2], name, nachdat))
+        script5, div5 = components(myplot(request, x, y1, z2, pokaz[3], name, nachdat))
+        script6, div6 = components(myplot(request, x, y1, z4, pokaz[4], name, nachdat))
+        script7, div7 = components(myplot(request, x, y1, z5, pokaz[5], name, nachdat))
+        script8, div8 = components(myplot(request, x, y1, z6, pokaz[6], name, nachdat))
+        script9, div9 = components(myplot(request, x, y1, z10, pokaz[7], name, nachdat))
+        script10, div10 = components(myplot(request, x, y1, z11, pokaz[8], name, nachdat))
+        script11, div11 = components(myplot(request, x, y1, z12, pokaz[9], name, nachdat))
+        script12, div12 = components(myplot(request, x, y1, z16, pokaz[12], name, nachdat))
+        script13, div13 = components(myplot(request, x, y1, z17, pokaz[13], name, nachdat))
+        script14, div14 = components(myplot(request, x, y1, z26, pokaz[14], name, nachdat))
+        script15, div15 = components(myplot(request, x, y1, z28, pokaz[15], name, nachdat))
+        script16, div16 = components(myplot(request, x, y1, z30, pokaz[16], name, nachdat))
+        script17, div17 = components(myplot(request, x, y1, z31, pokaz[17], name, nachdat))
+        script18, div18 = components(myplot(request, x, y1, z35, pokaz[18], name, nachdat))
+        script19, div19 = components(myplot(request, x, y1, z36, pokaz[19], name, nachdat))
+        script20, div20 = components(myplot(request, x, y1, z37, pokaz[20], name, nachdat))
+        script21, div21 = components(myplot(request, x, y1, z47, pokaz[21], name, nachdat))
 
         return render(request, 'ai/pdcalc.html', {'b_regn': regn, 'b_name': name, 'x': x,
                                                   'y1': y1, 'y2': y2, 'y3': y3, 'y22': y22, 'Acc': X[-1], 'tab': tab,
@@ -1522,17 +1604,17 @@ def pdcalc(request):
                                                   })
 
 
-def myplot(request, x, y1, y2, name_y2, b_name):
-    y2 = y2.ravel()
+def myplot(request, x, y1, y2, name_y2, b_name, nachdat):
+    # print('y2 = ',y2)
+    # y2 = y2.ravel()
     plot = figure(
         title='Вероятность дефолта банка и ' + name_y2 + ' банка ' + b_name,
         plot_width=1100,
         tools="pan, box_zoom, reset, save",
-        x_axis_label='номер квартала начиная с 1/01/2011', y_axis_label='Вероятность дефолта'
+        x_axis_label='номер квартала начиная с '+ nachdat, y_axis_label='Вероятность дефолта'
     )
     plot.y_range = Range1d(start=0 - max(y1) * 0.1, end=max(y1) * 1.1)
-    print('y2 = ')
-    print(y2)
+
     if min(y2) < 0:
         plot.extra_y_ranges['temp'] = Range1d(start=min(y2) + min(y2) * 0.1, end=max(y2) - 0.1 * min(y2))
     elif min(y2) == max(y2) == 0:
