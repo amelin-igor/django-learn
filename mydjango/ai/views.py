@@ -313,7 +313,7 @@ def starter(request, meter_title, chisizm):
 
     print(now)
 
-    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=90)).delete()
+    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=30)).delete()
     now = timezone.now()
     print(now)
 
