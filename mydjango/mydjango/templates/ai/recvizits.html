@@ -10,15 +10,17 @@
 
 {% if request.user.is_authenticated %}
 
-    <h5> Если Вы действуете от имени и/или по поручению юридического лица установите галочку и заполните следующую форму. Для регистрации юридического лица все поля в форме представленной ниже являются обязательными. Кодовое слово было отправлено на Ваш e-mail. Если Вы регистрируетесь как физическое лицо, снимите галочку и введите только кодовое слово. </h5>
+    <h5> Если Вы действуете от имени юридического лица установите галочку и заполните следующую форму. Для регистрации юридического лица все поля в форме представленной ниже являются обязательными. Кодовое слово было отправлено на Ваш e-mail. Если Вы регистрируетесь как физическое лицо, снимите галочку и введите только кодовое слово. </h5>
 
 <div class="col-12">
     <form action = "{% url 'ai:fillrec_page' %}" method = "POST">
 
         {% csrf_token %}
         </br>
-        <input id="ul_fl"  name="ul_fl" type="checkbox" title="Установите галочку для регистрации юридического лица" value="true" checked> Установите галочку для регистрации юридического лица</br>
+        <input id="ul_fl"  name="ul_fl" type="checkbox" title="Установите галочку для регистрации юридического лица" value="false" not checked> Установите галочку для регистрации юридического лица</br>
         <hr>
+
+        {% if ul_fl %}
 
         <input id="client_name" name="client_name" type="text" placeholder="Наименование организации" value="{{client_name_2}}" >   -  Наименование организации </br>
         </br>
@@ -34,9 +36,12 @@
         </br>
         <input id="country" name="country" type="text" placeholder="Страна" value="{{country_2}}">  - Страна </br>
         </br>
-        <input id="identificator" name="identificator" type="text" placeholder="ИНК" value="{{identificator_2}}">  - Идентификатор комплекта (для аппартной части) </br>
+        {% endif %}
+
+        <input id="mac" name="mac" type="text" placeholder="MAC - адрес устройства" value="{{mac_2}}"> < - Идентификатор комплекта MAC-адрес (для аппартной части) </br>
         </br>
         <input id="codeword" name="codeword" type="text" placeholder="Кодовое слово"  value="{{codeword_2}}"   >  - Кодовое слово </br>
+
         <hr>
 
 

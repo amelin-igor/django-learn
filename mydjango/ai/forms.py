@@ -10,6 +10,8 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 from django.http import Http404, HttpResponseRedirect
 
+# from .views import codegen_emailsend
+
 STATES = (
     ('', 'Choose...'),
     ('MG', 'Minas Gerais'),
@@ -155,6 +157,7 @@ def account_check(request):
 
 def get_ident(request):
     i = 0
+    regfulfilled = False
     print('get_ident ...')
     if request.user.is_superuser or not request.user.is_authenticated:
         ident = '00001'
@@ -162,6 +165,8 @@ def get_ident(request):
     else:
         print('If not is_superuser  ...')
         X = []
+        CN = []
+        UID = []
         try:
             a = User.objects.get(id=request.user.id)
             print('request.user.id = ')
@@ -176,16 +181,29 @@ def get_ident(request):
         i=0
         for cus in customer:
             X.append(cus.identificator)
+            CN.append(cus.client_name)
+            UID.append(cus.user_id)
             i = i + 1
 
-        print('Число комплектов аппаратуры c таким же номером = ')
+        print('Число комплектов аппаратуры c таким номером = ')
         print(i)
+        print('len(X) = ')
+        print(len(X))
+        print('CN = ')
+        print(CN)
 
-        if len(X) == '':
+        if len(X) == 0:
             X.append("0")
+
+        if len(UID) == 0:
+            print('Регистрация не завершена ')
+            #codegen_emailsend(request)
+            regfulfilled = False
+        else:
+            regfulfilled = True
 
         ident = X[-1]
         print ('my_ident = ')
         print(ident)
 
-    return ({'ident': ident, 'i': i})
+    return ({'ident': ident, 'i': i, 'RFF':regfulfilled})

@@ -139,14 +139,17 @@
                         {% url 'ai:serv_page' as url_serv %}
                         {% url 'ai:mail_page' as url_mail %}
                         {% url 'ai:control_page' as url_cont %}
+                        {% url 'ai:update_dev' as url_update_dev %}
 
                         {% if request.user.is_superuser %}
                          <a class="dropdown-item" href="{{url_deposit}}">Пополнение базы данных</a>
                          <a class="dropdown-item" href="{{url_serv}}" >Служебная процедура</a>
                          {% endif %}
+
                         <a class="dropdown-item" href="{{url_cont}}">Управление переключателями</a>
 
                      <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{url_update_dev}}">Добавить устройство</a>
                         <a class="dropdown-item" href="{{url_mail}}">Отправить e-mail</a>
                     </div>
                     </li>
@@ -181,7 +184,7 @@
                         {% url 'ai:register_page' as url_register_page %}
                           {% url 'ai:offerta_page' as url_offerta_page %}
 
-                        <! <a class = " nav-link {% if url_offerta_page == request.path %}active{% endif %} " href = "{{url_offerta_page}}"> <!Регистрация</a>
+                         <a class = " nav-link {% if url_offerta_page == request.path %}active{% endif %} " href = "{{url_offerta_page}}"> Регистрация</a>
                        </li>
                     {% endif %}
                </ul>

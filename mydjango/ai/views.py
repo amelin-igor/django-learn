@@ -13,7 +13,7 @@ from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 
-from .models import Metering, Customer, Customerrec, Note, my_control
+from .models import Metering, Customer, Customerrec, Note, my_control, device
 
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.models import User
@@ -160,11 +160,21 @@ def add(request):
         mt = "Пояснения "
         data = 't = ' + str(t) + ' h = ' + str(h) + ' CO2 = ' + str(co2) + ' CH4 = ' + str(ch4) + ' n2o = ' + str(n2o)
 
-        # if t > 25:
+        try:
+            print('from Customerrec try...')
+            q = Customerrec.objects.filter(identificator=login)
 
-        if login in password:
-            if password[login] == pasw:
-                nameandpaswcorrect = True
+            for LI in q:
+                f = LI.comment
+            print('codeword =')
+            print(f)
+
+        except:
+            print('from add Customerrec except:')
+            return Response({"add": "wrong codeword - data rejected"})
+
+        if f == pasw:
+            nameandpaswcorrect = True
 
         if nameandpaswcorrect == True:
             a = 'YES_'
@@ -202,40 +212,15 @@ def add(request):
                 'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
                          data + ' / ' + ': Wrong user name!' + '\n')
 
-    # print(login)
-    # print(name)
-    # print(mt)
-    # print(t)
-    # print(h)
-    # print(co2)
-    # print(ch4)
-    # print(n2o)
-    # print(now)
 
     m = Metering(meter_identificator=login, meter_title=name, meter_text=mt, meter_temperature=t, meter_humidity=h,
                  meter_CO2=co2,
                  meter_CH4=ch4, meter_N2O=n2o, meter_datetime=now)
     m.save()
-    # return render(request, 'ai/add.html', {'metering': m})
-    # return HttpResponseRedirect(reverse('ai:starter', args = (m.meter_title,)))
-    # return render(request, 'ai/pdstart.html')
-
-    # return JsonResponse({'meter_identificator' : login, 'meter_title' : name, 'meter_text' : mt, 'meter_temperature' : t})
-    # return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
-
-    # request_data = json.loads(request.body.decode('utf-8'))  # This assumes your request body is JSON
 
     v1 = my_condition_2(request)
-    # json_data = json.dumps(v1)
-    # print(v1)
+
     return JsonResponse(v1, safe=False)
-
-    # return Response({"key": "value", "key2": "value2"})
-
-    # a = 'Yes'
-    # b = 'No'
-    # return a
-    # return render(request, 'ai/sms.html', {'reason': a, "sms_sux": b})
 
 
 def show(request):
@@ -310,6 +295,10 @@ def starter(request, meter_title, chisizm):
     print(voc)
     ident = voc['ident']
 
+    RegFF = voc['RFF']
+    if RegFF == False:
+        codegen_emailsend(request)
+        return render(request, 'ai/recvizits.html')
 
     print(now)
 
@@ -630,6 +619,11 @@ def nabobj(request):
     print(voc)
 
     ident = voc['ident']
+
+    RegFF = voc['RFF']
+    if RegFF == False:
+        codegen_emailsend(request)
+        return render(request, 'ai/recvizits.html')
 
     print('nabobj_ident =')
     print(ident)
@@ -1130,7 +1124,9 @@ def pdcalc(request):
 
     if depositIsNull == True:
         mes = 'Не достаточно средств на текущем счете - пополните депозит'
-        return render(request, 'ai/deposit.html', mes=mes)
+        acc = 0
+        # return render(request, 'ai/deposit.html', mes=mes)
+        return render(request, 'ai/deposit.html', {'Acc': acc, 'mes': mes})
     else:
         # mod = "model_X20_jpt22"
         # mod = "model_X51PCZ_37"
@@ -1889,7 +1885,9 @@ def fillrec(request):
     kpp = request.POST.get('kpp')
     ogrn = request.POST.get('ogrn')
     country = request.POST.get('country')
-    identificator = request.POST.get('identificator')
+    # identificator = request.POST.get('identificator')
+    identificator = identific(request)
+    mac = request.POST.get('mac')
     codeword = request.POST.get('codeword')
     ul_fl = request.POST.get('ul_fl')
     print('ul_fl =')
@@ -1938,7 +1936,7 @@ def fillrec(request):
     mist_fild = []
 
     if i > 0:
-        msg += ' Комлект аппаратуры с таким номером уже зарегистрирован. Регистрация не возможна /'
+        msg += ' Комлект аппаратуры с таким номером уже зарегистрирован. Регистрация невозможна /'
         mist_fild.append('true')
 
     if ul_fl == 'true':
@@ -2004,7 +2002,7 @@ def fillrec(request):
                                                          'client_name_full_2': client_name_full,
                                                          'country_2': country, 'kpp_2': kpp,
                                                          'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
-                                                         'identificator_2': identificator})
+                                                         'mac_2': mac})
         else:
             msg_1 = 'Проверка введенных данных выполнена. '
             msg = msg_1 + msg
@@ -2019,12 +2017,18 @@ def fillrec(request):
                                                          'client_name_full_2': client_name_full,
                                                          'country_2': country, 'kpp_2': kpp,
                                                          'ogrn_2': ogrn, 'comment_2': codeword, 'vid_2': vid,
-                                                         'identificator_2': identificator})
+                                                         'mac_2': mac})
 
     m = Customerrec(client_name=client_name, adres=adres, inn=inn, user_id=request.user.id,
                     client_name_full=client_name_full, country=country, kpp=kpp, ogrn=ogrn,
-                    comment=codeword, vid=vid, datetime=now, identificator=identificator)
+                    comment=codeword, vid=vid, datetime=now, identificator=identificator, mac=mac)
     m.save()
+
+    devname = 'Устройство 1'
+    comment = ' '
+    m2 = device(comment=comment, devname=devname, datetime=now, identificator=identificator, mac=mac,user_id=request.user.id)
+    m2.save()
+
     msg += 'Реквизиты занесены в базу данных.'
 
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), un + '_tuden.txt')
@@ -2115,6 +2119,9 @@ def success(request):
         html_content = '<strong>and easy to do anywhere, even with Python</strong>')
     try:
         sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        print('os.environ.get(SENDGRID_API_KEY) = ')
+        print(os.environ.get('SENDGRID_API_KEY'))
+
         response = sg.send(message)
         print(response.status_code)
         print(response.body)
@@ -2156,6 +2163,7 @@ def send_codeword_old(request, codeword):
 
 
 def send_codeword(request, codeword):
+    print('send_codeword...')
     email = user_email(request)
     print('email=')
     print(email)
@@ -2184,6 +2192,8 @@ def send_codeword(request, codeword):
             html_content = data)
         try:
             sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            print('os.environ.get(my_pc_2) = ')
+            print(os.environ.get('SENDGRID_API_KEY'))
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
@@ -2191,8 +2201,8 @@ def send_codeword(request, codeword):
             msg = 'Сообщение отправлено по e-mail'
         except Exception as e:
 
-            print(e.message)
-            msg = e.message
+            print(e)
+            msg = e
     return email
 
 
@@ -2230,7 +2240,8 @@ def codegen_emailsend(request):
     email = send_codeword(request, codeword_2)
     un = user_name(request)
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), un + '_tuden.txt')
-    f = open(path, 'a')
+    # f = open(path, 'a')
+    f = open(path, 'w')
     f.write(codeword_2)
     f.close()
 
@@ -2351,6 +2362,11 @@ def control(request):
     print('voc = ')
     print(voc)
     ident = voc['ident']
+    RegFF = voc['RFF']
+    if RegFF == False:
+        codegen_emailsend(request)
+        return render(request, 'ai/recvizits.html')
+
     now = timezone.now()
 
     dev_1 = []
@@ -2408,6 +2424,11 @@ def control_save(request):
     print("control_save")
     voc = get_ident(request)
     ident = voc['ident']
+    RegFF = voc['RFF']
+    if RegFF == False:
+        codegen_emailsend(request)
+        return render(request, 'ai/recvizits.html')
+
     dev_1 = request.POST.get('device_1')
     print("dev_1 =")
     print(dev_1)
@@ -2709,6 +2730,11 @@ class my_dataView(APIView):
         print('ident = ')
         print(ident)
 
+        RegFF = voc['RFF']
+        if RegFF == False:
+            codegen_emailsend(request)
+            return render(request, 'ai/recvizits.html')
+
 
 
         try:
@@ -2799,3 +2825,62 @@ class my_dataView(APIView):
             return Response(res)
         else:
             return Response({"my_data": "No data"})
+
+
+def identific(request):
+    latest_ident = Customerrec.objects.order_by('-datetime')[:1]
+    X = []
+    for LI in latest_ident:
+        # X.append(LI.identificator)
+         y =  LI.identificator
+
+    print('latest_ident = ')
+    print(y)
+    z = int(y)+1
+
+    # x = X[-1]
+    return z
+
+
+def init_dev(request):
+    print('init_dev...')
+    now = timezone.now()
+    mac = request.GET.get('mac')
+
+    try:
+        print('try...')
+        q = device.objects.filter(mac=mac)
+
+        for LI in q:
+            y = LI.identificator
+            z = LI.devname
+
+        print('identificator =')
+        print(y)
+        print('devname =')
+        print(z)
+        # 30:83:98:A2:6B:51
+
+    except:
+        print('except:')
+        return Response({"init_dev_try": "No data (identificator or devname)"})
+
+    try:
+        print('from Customerrec try...')
+        q = Customerrec.objects.filter(identificator = y)
+
+        for LI in q:
+            f = LI.comment
+
+        print('codeword =')
+        print(f)
+
+    except:
+        print('from Customerrec except:')
+        return Response({"init_dev_try": "No codeword"})
+
+
+
+    v1 =  {'devname': z, 'identificator': y, 'codeword' : f }
+
+    return JsonResponse(v1, safe=False)

@@ -55,6 +55,7 @@ urlpatterns = [
     path('test_js3/<str:meter_title>/<int:chisizm>/', views.test_js3, name='test_js3_page'),
 
     path('my_data/', views.my_dataView.as_view(), name='my_data_page'),
+    path('init_dev/', views.init_dev, name='init_dev_page'),
 
 ]
 

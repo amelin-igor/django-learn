@@ -58,17 +58,18 @@ class Customer(models.Model):
 class Customerrec(models.Model):
     user = models.ForeignKey(User, verbose_name= 'Пользователь', on_delete = models.CASCADE)
     phone = models.CharField ( max_length = 20, verbose_name= 'Номер телефона')
-    adres = models.CharField(max_length=20, verbose_name='Адрес')
-    client_name = models.CharField(max_length=50, verbose_name='Наименование клиента')
-    client_name_full = models.CharField(max_length=50, verbose_name='Полное наименование клиента')
-    country = models.CharField(max_length=50, verbose_name='Страна')
-    inn = models.CharField(max_length=20, verbose_name='ИНН')
-    kpp = models.CharField(max_length=20, verbose_name='КПП')
-    ogrn = models.CharField(max_length=20, verbose_name='ОГРН')
+    adres = models.CharField(max_length=20, verbose_name='Адрес', null=True)
+    client_name = models.CharField(max_length=50, verbose_name='Наименование клиента', null=True)
+    client_name_full = models.CharField(max_length=50, verbose_name='Полное наименование клиента', null=True)
+    country = models.CharField(max_length=50, verbose_name='Страна', null=True)
+    inn = models.CharField(max_length=20, verbose_name='ИНН', null=True)
+    kpp = models.CharField(max_length=20, verbose_name='КПП', null=True)
+    ogrn = models.CharField(max_length=20, verbose_name='ОГРН', null=True)
     comment = models.CharField(max_length=200, verbose_name='Кодовое слово')
     vid = models.IntegerField('vid', default=0) # вид контрагента 0 - физлицо; 1 -юрлицо; 2 - ИП
-    identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
-
+    identificator = models.CharField(max_length=10, verbose_name='Идентификатор устройства', default='00001')
+    mac = models.CharField(max_length=20, verbose_name='MAC-адрес', default='30:83:98:A2:6B:51')
+    # Zoryka mac = 30:83:98:A2:6B:51
     datetime = models.DateTimeField('дата регистрации')
 
     def __str__(self):
@@ -96,3 +97,19 @@ class my_control(models.Model):
     class Meta:
         verbose_name = 'Состояние вектора управляения '
         verbose_name_plural = 'Состояния векторов управляения '
+
+class device(models.Model):
+    user = models.ForeignKey(User, verbose_name= 'Пользователь', on_delete = models.CASCADE)
+    mac = models.CharField(max_length=20, verbose_name='MAC-адрес', default='30:83:98:A2:6B:50')
+    devname = models.CharField(max_length=20, verbose_name='Имя устройства', default='No Name')
+    comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
+    identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
+    datetime = models.DateTimeField('дата действия')
+
+    def __str__(self):
+
+        return 'Устройства пользователя: {}'.format(self.user.username)
+
+    class Meta:
+        verbose_name = 'Устройство '
+        verbose_name_plural = 'Устройства '
