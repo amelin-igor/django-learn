@@ -2840,14 +2840,16 @@ def identific(request):
     latest_ident = Customerrec.objects.order_by('-datetime')[:1]
     X = []
     for LI in latest_ident:
-        # X.append(LI.identificator)
+         X.append(LI.identificator)
          y =  LI.identificator
 
-    print('latest_ident = ')
-    print(y)
-    z = int(y)+1
+    if len(X) == 0:
+        z = 1
+    else:
+        print('latest_ident = ')
+        print(y)
+        z = int(y)+1
 
-    # x = X[-1]
     return z
 
 
