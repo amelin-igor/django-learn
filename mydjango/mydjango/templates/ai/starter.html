@@ -12,7 +12,7 @@
 <table width="1150" border="0">
         <tr>
              <td>
-                Данные телеметрии c {{date_first}} по {{date_last}} (UTC) | {{nabobj_name}} </br>
+                Данные телеметрии c {{date_first}} по {{date_last}} (UTC) | {{name_cow }} | {{nabobj_name}} </br>
                 Температура {{t_last}}<sup>o</sup> |
                 Влажность  {{h_last}}% |
                 Концентрация {{gas_name}}  {{CO2_last}} ppm |
@@ -151,7 +151,7 @@
                             {% if metter_of_buryonka %}
                                 {% for c in metter_of_buryonka %}
                                     <p>
-                                        {{nabobj_name}} | {{c.meter_datetime |date:"Y-m-d H:i:s"}} | температура={{c.meter_temperature}}<sup>o</sup> | влажность={{c.meter_humidity}}% | {{gas_name}}={{c.meter_CO2}} ppm </br>
+                                        {{name_cow}} | {{c.meter_datetime |date:"Y-m-d H:i:s"}} | температура={{c.meter_temperature}}<sup>o</sup> | влажность={{c.meter_humidity}}% | {{gas_name}}={{c.meter_CO2}} ppm </br>
                                     </p>
                                 {% endfor %}
 

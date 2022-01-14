@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Датчики{% endblock %}
+
+{% block content %}
+
+<style type='text/css'>
+	input, textarea {border-color: red; }
+</style>
+
+{% if request.user.is_authenticated %}
+
+    <h5> Регистрация нового датчика </h5>
+
+
+</br>
+<hr>
+    <h5> Список зарегистрированных датчиков </h5>
+                            {% if dev %}
+                                {% for c in dev %}
+                                    <p>
+                                        -{{c.devname }} | {{ c.datetime | date:"Y-m-d H:i:s"}} | MAC-адрес ={{c.mac}} | {{c.comment }} </br>
+                                    </p>
+                                {% endfor %}
+
+                            {% else %}
+                                    зарегистрированных датчиков не надено
+                            {% endif %}
+
+
+    </hr>
+
+
+
+<div class="col-12">
+    <form action = "{% url 'ai:save_dev_page' %}" method = "POST">
+
+        {% csrf_token %}
+
+
+        <input id="mac" name="mac" type="text" placeholder="MAC - адрес устройства" value="{{mac_2}}">   - идентификатор устройства (MAC-адрес подключаемого устройства) </br>
+        </br>
+        <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment_2}}"   >  - название устройства (например: датчик на кухне)  </br>
+        </br>
+
+        <hr>
+
+
+
+        <input class="btn btn-primary" type="submit" value="Сохранить"> {{msg}}
+        <! <button type="submit"> <!Сохранить<!</button>
+        <hr>
+    </form>
+
+    </div>
+
+{% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+
+
+
+
+{% endblock %}

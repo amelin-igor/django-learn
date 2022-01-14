@@ -139,7 +139,7 @@
                         {% url 'ai:serv_page' as url_serv %}
                         {% url 'ai:mail_page' as url_mail %}
                         {% url 'ai:control_page' as url_cont %}
-                        {% url 'ai:update_dev' as url_update_dev %}
+                        {% url 'ai:update_dev_page' as url_update_dev %}
 
                         {% if request.user.is_superuser %}
                          <a class="dropdown-item" href="{{url_deposit}}">Пополнение базы данных</a>

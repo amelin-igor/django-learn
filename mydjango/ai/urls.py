@@ -56,6 +56,10 @@ urlpatterns = [
 
     path('my_data/', views.my_dataView.as_view(), name='my_data_page'),
     path('init_dev/', views.init_dev, name='init_dev_page'),
+    path('update_dev/', views.update_dev, name='update_dev_page'),
+    path('save_dev/', views.save_dev, name='save_dev_page'),
+    path('java_call/', views.java_call, name='java_call_page'),
+
 
 ]
 

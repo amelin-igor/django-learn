@@ -88,6 +88,7 @@ class my_control(models.Model):
     comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
     identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
 
+
     datetime = models.DateTimeField('дата действия')
 
     def __str__(self):

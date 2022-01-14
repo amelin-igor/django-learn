@@ -173,7 +173,7 @@ def add(request):
             print('from add Customerrec except:')
             return Response({"add": "wrong codeword - data rejected"})
 
-        if f == pasw:
+        if f == pasw or password[login]== pasw:
             nameandpaswcorrect = True
 
         if nameandpaswcorrect == True:
@@ -296,7 +296,7 @@ def starter(request, meter_title, chisizm):
     ident = voc['ident']
 
     RegFF = voc['RFF']
-    if RegFF == False:
+    if RegFF == False and request.user.is_authenticated:
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
@@ -358,6 +358,7 @@ def starter(request, meter_title, chisizm):
     name_cow = data.meter_title
     print(name_cow)
 
+
     # result =np.column_stack((latest_data_list, number))
 
     if name_cow == 'Yarushka':
@@ -377,7 +378,10 @@ def starter(request, meter_title, chisizm):
         gas_name = 'CH4'
     else:
         nabobj_name = 'Объект NoName'
-        gas_name = 'UnKnown gas'
+        #gas_name = 'UnKnown gas'
+        gas_name = 'gas'
+
+    nabobj_name = def_comment(name_cow)
 
     x1 = range(len(y1))
     print(len(y1))
@@ -621,7 +625,7 @@ def nabobj(request):
     ident = voc['ident']
 
     RegFF = voc['RFF']
-    if RegFF == False:
+    if RegFF == False and request.user.is_authenticated:
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
@@ -2538,21 +2542,24 @@ def my_condition_2(request):
 
     try:
         print("control = ")
-        a = my_control.objects.filter(identificator=login)
-        #print(a)
+        a = my_control.objects.filter(identificator=str(login))
+        print('a=')
+        print(a)
         control = a.order_by('id')
+        print('a=')
+        print(a)
 
         for c in control:
             dev_1.append(c.dev_1)
             dev_2.append(c.dev_2)
             dev_3.append(c.dev_3)
 
-        # print ('dev_1[-1] = ')
-        # print(dev_1[-1])
-        # print('dev_2[-1] = ')
-        # print(dev_2[-1])
-        # print('dev_3[-1] = ')
-        # print(dev_3[-1])
+        print ('dev_1[-1] = ')
+        print(dev_1[-1])
+        print('dev_2[-1] = ')
+        print(dev_2[-1])
+        print('dev_3[-1] = ')
+        print(dev_3[-1])
 
         if dev_1[-1] == False or dev_1[-1] == None:
             d1 = 'fals'
@@ -2731,7 +2738,7 @@ class my_dataView(APIView):
         print(ident)
 
         RegFF = voc['RFF']
-        if RegFF == False:
+        if RegFF == False and request.user.is_authenticated:
             codegen_emailsend(request)
             return render(request, 'ai/recvizits.html')
 
@@ -2792,7 +2799,8 @@ class my_dataView(APIView):
             gas_name = 'CH4'
         else:
             nabobj_name = 'Объект NoName'
-            gas_name = 'UnKnown gas'
+            #gas_name = 'UnKnown gas'
+            gas_name = 'gas'
 
         print(nabobj_name)
 
@@ -2828,6 +2836,7 @@ class my_dataView(APIView):
 
 
 def identific(request):
+    # находим последний присвоенный идентификатор, увеличиваем его номер на 1 и присваиваем регистрирующемуся
     latest_ident = Customerrec.objects.order_by('-datetime')[:1]
     X = []
     for LI in latest_ident:
@@ -2882,5 +2891,136 @@ def init_dev(request):
 
 
     v1 =  {'devname': z, 'identificator': y, 'codeword' : f }
+
+    return JsonResponse(v1, safe=False)
+
+
+def update_dev(request):
+    print('update_dev...')
+    now = timezone.now()
+    try:
+        print('try...')
+        q = device.objects.filter(user_id=request.user.id)
+        my_dev = q.order_by('datetime')
+
+        comment = []
+        ident = []
+        devname = []
+        mac = []
+        dt = []
+
+        for LI in my_dev:
+            comment.append(LI.comment)
+            ident.append(LI.identificator)
+            devname.append (LI.devname)
+            mac.append(LI.mac)
+            dt.append(LI.datetime)
+
+        print('comment =')
+        print(comment[-1])
+        print('devname =')
+        print(devname[-1])
+        print('mac =')
+        print(mac[-1])
+        # 30:83:98:A2:6B:51
+
+    except:
+        print('except:')
+        # return Response({"update_dev_try": "No data (identificator or devname)"})
+
+
+
+    #return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
+    return render(request, 'ai/update_dev.html', {"dev": my_dev})
+
+
+def save_dev(request):
+    print('save_dev...')
+    now = timezone.now()
+    mac = request.POST.get('mac')
+    comment = request.POST.get('comment')
+
+    print('len(mac) = ')
+    print(len(mac))
+
+
+
+    try:
+        print('try...')
+        q = device.objects.filter(user_id=request.user.id)
+        my_dev = q.order_by('datetime')
+
+        ident = []
+        devname = []
+
+        for LI in my_dev:
+            ident.append(LI.identificator)
+            devname.append (LI.devname)
+
+        print('ident =')
+        print(ident[-1])
+        print('devname =')
+        print(devname[-1])
+
+    except:
+        print('except:')
+        return Response({"save_dev_try": "No data (identificator or devname)"})
+
+
+
+    devname_new = 'Device_' + str(len(devname)+1)
+
+    if len(mac)!=17:
+        msg = "Внимание! Некорректно указан MAC-адрес, пожалуйста, повторите ввод"
+        return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
+
+    maci=[]
+    try:
+        q = device.objects.filter(mac=mac)
+        for LI in q:
+            maci.append(LI.mac)
+
+
+    except:
+        print('нет такого MAC - заносим')
+
+    if len(maci) >0:
+        msg = "Внимание! Устройство с таким MAC-адресом уже зарегистрировано. Возможно некорректно указан MAC-адрес, пожалуйста, повторите ввод"
+        return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
+
+    m = device(comment=comment, devname=devname_new, datetime=now, identificator=ident[-1], mac=mac,
+                user_id=request.user.id)
+    m.save()
+
+    #return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
+    return render(request, 'ai/update_dev_done.html',{'devname':devname_new, "comment":comment, "mac":mac, "datetime": now})
+
+
+
+
+
+def def_comment(name_cow):
+    print('def_comment...')
+    try:
+        print('try...')
+        q = device.objects.filter(devname=name_cow)
+        my_dev = q.order_by('datetime')
+        comment = []
+        for LI in my_dev:
+            comment.append(LI.comment)
+
+        print('comment =')
+        print(comment[-1])
+        z = comment[-1]
+
+    except:
+        print('except:')
+        #return Response({"def_comment": "No data - devname"})
+        z = "Строение 1"
+    return z
+
+def java_call(request):
+    print("java_call")
+    v1  = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals'}
 
     return JsonResponse(v1, safe=False)
