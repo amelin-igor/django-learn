@@ -3112,12 +3112,12 @@ def java_call(request):
             y4_last = 0
 
         v1  =   {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
-        temp_1 = "\""
-        print("temp_1=")
-        print(temp_1)
+        #temp_1 = "\""
+        #print("temp_1=")
+        #print(temp_1)
         v2 = { dev : v1}
 
-        #v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
+        v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
         V_V.append(v2)
 
-    return JsonResponse(V_V, safe=False)
+    return JsonResponse(v1, safe=False)

@@ -87,8 +87,6 @@ class my_control(models.Model):
     dev_3 = models.BooleanField(verbose_name='Устройство 3', default=0)
     comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
     identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
-
-
     datetime = models.DateTimeField('дата действия')
 
     def __str__(self):
@@ -108,8 +106,7 @@ class device(models.Model):
     datetime = models.DateTimeField('дата действия')
 
     def __str__(self):
-
-        return 'Устройства пользователя: {}'.format(self.user.username)
+        return 'Устройства пользователя: {}'.format(self.devname)
 
     class Meta:
         verbose_name = 'Устройство '

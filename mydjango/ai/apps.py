@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AiConfig(AppConfig):
     name = 'ai'
-    verbose_name = 'Блог'
+    verbose_name = 'SMARP'
