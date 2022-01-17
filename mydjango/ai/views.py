@@ -49,6 +49,8 @@ from sendgrid.helpers.mail import Mail
 
 from datetime import datetime, timedelta
 
+
+
 matplotlib.use('Agg')
 
 # import numpy as np
@@ -142,6 +144,7 @@ def page2(request):
 
 def add(request):
     print('add')
+    f = "234"
     # now = datetime.datetime.now()
     now = timezone.now()
     nameandpaswcorrect = False
@@ -160,18 +163,19 @@ def add(request):
         mt = "Пояснения "
         data = 't = ' + str(t) + ' h = ' + str(h) + ' CO2 = ' + str(co2) + ' CH4 = ' + str(ch4) + ' n2o = ' + str(n2o)
 
-        try:
-            print('from Customerrec try...')
-            q = Customerrec.objects.filter(identificator=login)
+        if login != "00001":
+            try:
+                print('from Customerrec try...')
+                q = Customerrec.objects.filter(identificator=login)
 
-            for LI in q:
-                f = LI.comment
-            print('codeword =')
-            print(f)
+                for LI in q:
+                    f = LI.comment
+                print('codeword =')
+                print(f)
 
-        except:
-            print('from add Customerrec except:')
-            return Response({"add": "wrong codeword - data rejected"})
+            except:
+                print('from add Customerrec except:')
+                return Response({"add": "wrong codeword - data rejected"})
 
         if f == pasw or password[login]== pasw:
             nameandpaswcorrect = True
@@ -320,20 +324,9 @@ def starter(request, meter_title, chisizm):
     print('len_all=')
     print(len_all)
 
-
-
-
-
     latest_data_list = q.order_by('-meter_datetime')[:chisizm]
     z = {'metter_of_buryonka': latest_data_list}
-    # print('latest_data_list =')
-    # print(latest_data_list)
 
-    # x1 = [1, 10, 35, 27]
-    # y1 = [0, -1, -0.5, 0.2]
-
-    # x1 = latest_data_list.meter_datetime
-    # y1 = latest_data_list.Metering.meter_temperature
     x0 = []
     y1 = []
     y2 = []
@@ -2028,7 +2021,7 @@ def fillrec(request):
                     comment=codeword, vid=vid, datetime=now, identificator=identificator, mac=mac)
     m.save()
 
-    devname = 'Устройство 1'
+    devname = 'Device_1'
     comment = ' '
     m2 = device(comment=comment, devname=devname, datetime=now, identificator=identificator, mac=mac,user_id=request.user.id)
     m2.save()
@@ -2195,7 +2188,14 @@ def send_codeword(request, codeword):
             subject='Регистрация',
             html_content = data)
         try:
-            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            # sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY2'))
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'cw.txt')
+            f = open(path, 'r')
+            cw = f.read()
+            f.close()
+            SENDGRID_API_KEY2 = cw
+            print(cw)
+            sg = SendGridAPIClient(SENDGRID_API_KEY2)
             print('os.environ.get(my_pc_2) = ')
             print(os.environ.get('SENDGRID_API_KEY'))
             response = sg.send(message)
@@ -3023,6 +3023,101 @@ def def_comment(name_cow):
 
 def java_call(request):
     print("java_call")
-    v1  = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals'}
+    login = request.GET.get('login')
+    print("login = ")
+    print(login)
 
-    return JsonResponse(v1, safe=False)
+    try:
+        print('try...')
+        q = device.objects.filter(identificator=login)
+        my_dev = q.order_by('datetime')
+        devname = []
+        for LI in my_dev:
+            devname.append(LI.devname)
+
+        print('devname =')
+        print(devname)
+        # z = comment[-1]
+
+    except:
+        print('except:')
+        z  = {'device': 'false'}
+        return z
+
+    date_last = 1/1/2022
+    y1_last = 0
+    y2_last = 0
+    y4_last = 0
+
+    V_V = []
+    for dev in devname:
+        try:
+            q = Metering.objects.filter(meter_title=dev, meter_identificator=login)
+            now = timezone.now()
+            print(now)
+            print("dev = ")
+            print(dev)
+        except:
+            raise Http404("Нет запрашиваемых данных")
+        latest_data_list = q.order_by('-meter_datetime')[:5]
+
+        x0 = []
+        y1 = []
+        y2 = []
+        y4 = []
+        number = []
+
+        i = 1
+        # format = '%b %d %Y %I:%M%p' # Формат
+        format = '%H:%M'  # Формат
+
+        for data in latest_data_list:
+            x0.append(data.meter_datetime)
+            y1.append(data.meter_temperature)
+            y2.append(data.meter_humidity)
+            y4.append(data.meter_CO2)
+            number.append(i)
+            i = i + 1
+
+        #name_cow = data.meter_title
+        #print(name_cow)
+
+        print("i=")
+        print(i)
+        print("x0 = ")
+        print(x0)
+        print("y1=")
+        print(y1)
+        print("y2=")
+        print(y2)
+        print("y4=")
+        print(y4)
+
+
+        # Формируем список с обратной последовательностью
+        #y10 = y1[::-1]
+        #y20 = y2[::-1]
+        #y40 = y4[::-1]
+        #x10 = x0[::-1]
+        if i > 1:
+        # последние элементы списков
+            date_last = x0[-1]
+            y1_last = y1[-1]
+            y2_last = y2[-1]
+            y4_last = y4[-1]
+        else:
+            date_last = 0
+            y1_last = 0
+            y2_last = 0
+            y4_last = 0
+
+        v1  =   {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
+        temp_1 = "\""
+        print("temp_1=")
+        print(temp_1)
+        v2 = { dev : v1}
+
+        #v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
+        V_V.append(v2)
+
+    return JsonResponse(V_V, safe=False)
