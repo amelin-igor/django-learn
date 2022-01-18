@@ -19,7 +19,8 @@ class Metering(models.Model):
     meter_identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)',
                                      default='00001')
     def __str__(self):
-        return self.meter_title
+        #return self.meter_title
+        return 'Мониторинг: {}'.format(self.meter_identificator +" / "+ self.meter_title +" / "+ str(self.meter_datetime))
 
     def was_measured_recently(self):
         return self.meter_datetime >= (timezone.now() - datetime.timedelta(days = 7))
@@ -52,8 +53,8 @@ class Customer(models.Model):
         return 'Покупатель: {}'.format(self.user.username)
 
     class Meta:
-        verbose_name = 'Клиент'
-        verbose_name_plural = 'Клиенты'
+        verbose_name = 'Действие клиентов PD '
+        verbose_name_plural = 'Действия клиентов PD '
 
 class Customerrec(models.Model):
     user = models.ForeignKey(User, verbose_name= 'Пользователь', on_delete = models.CASCADE)
@@ -106,7 +107,7 @@ class device(models.Model):
     datetime = models.DateTimeField('дата действия')
 
     def __str__(self):
-        return 'Устройства пользователя: {}'.format(self.devname)
+        return f'Устройства пользователя: {self.user.username +" / " + self.devname}'
 
     class Meta:
         verbose_name = 'Устройство '

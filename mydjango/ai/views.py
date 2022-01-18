@@ -1909,32 +1909,43 @@ def fillrec(request):
     X = []
     Y = []
     Z = []
+    maci = []
     try:
-        a = Customerrec.objects.filter(identificator=identificator)
+        #a = device.objects.filter(identificator=identificator)
+        a = device.objects.all()
         customer = a.order_by('id')[:]
         print('customer = ')
         print(customer)
         i = 0
+        j = 0
         for cus in customer:
             X.append(cus.identificator)
             Y.append(cus.user_id)
             Z.append(cus.user.username)
+            maci.append(cus.mac)
             i = i + 1
+
+        # print('ID пользователя с таким же номером комплекта')
+        # print(Y)
+        # print('имена пользователей с таким же номером комплекта')
+        # print(Z)
+
+        for mac2 in maci:
+            if mac == mac2:
+                j = j + 1
         print('Число комплектов аппаратуры c таким же номером = ')
-        print(i)
-        print('ID пользователя с таким же номером комплекта')
-        print(Y)
-        print('имена пользователей с таким же номером комплекта')
-        print(Z)
+        print(j)
+
     except:
         i = 0
         # raise Http404("Комлект с таким номером отсутствует")
 
     mist_fild = []
 
-    if i > 0:
+    if j > 0:
         msg += ' Комлект аппаратуры с таким номером уже зарегистрирован. Регистрация невозможна /'
         mist_fild.append('true')
+        return render(request, 'ai/message.html', {'msg': msg})
 
     if ul_fl == 'true':
 
