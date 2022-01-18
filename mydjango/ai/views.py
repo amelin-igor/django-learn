@@ -3063,7 +3063,7 @@ def java_call(request):
     y2_last = 0
     y4_last = 0
 
-    V_V = []
+    V_V = {}
     for dev in devname:
         try:
             q = Metering.objects.filter(meter_title=dev, meter_identificator=login)
@@ -3125,13 +3125,14 @@ def java_call(request):
             y2_last = 0
             y4_last = 0
 
-        v1  =   {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
+        #v1  =   {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
         #temp_1 = "\""
         #print("temp_1=")
         #print(temp_1)
         v2 = { dev : v1}
 
         v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
-        V_V.append(v2)
+        #V_V.append(v2)
+        V_V[dev] = v1
 
     return JsonResponse(V_V, safe=False)
