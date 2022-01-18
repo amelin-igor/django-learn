@@ -627,6 +627,9 @@ def nabobj(request):
     # cow_metering_list = Metering.objects.all()
     cow_metering_list = Metering.objects.filter(meter_identificator=ident)
 
+    # ! этот вариант работаем намного быстрее, но только для датчиков с мак-адресом
+    # cow_metering_list = device.objects.filter(identificator=ident)
+
     X = []
     for cow in cow_metering_list:
         X.append(cow.meter_title)
@@ -3131,4 +3134,4 @@ def java_call(request):
         v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last}
         V_V.append(v2)
 
-    return JsonResponse(v1, safe=False)
+    return JsonResponse(V_V, safe=False)
