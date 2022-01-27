@@ -2390,6 +2390,7 @@ def control(request):
     dev_1 = []
     dev_2 = []
     dev_3 = []
+    delay = []
 
     if request.user.is_authenticated == True:
         try:
@@ -2408,11 +2409,14 @@ def control(request):
         dev_1.append(c.dev_1)
         dev_2.append(c.dev_2)
         dev_3.append(c.dev_3)
+        delay.append(c.my_delay)
+
 
     if len(dev_1) == 0:
         dev_1.append("False")
         dev_2.append("False")
         dev_3.append("False")
+        delay.append(0)
 
     print('dev_1[-1] = ')
     print(dev_1[-1])
@@ -2433,9 +2437,12 @@ def control(request):
     print("d1 =")
     print(d1)
 
+    print('delay = ')
+    print(delay[-1])
+
     return render(request, 'ai/control.html',
                   {'dev_1': dev_1[-1], 'dev_2': dev_2[-1], 'dev_3': dev_3[-1], 'user_id': request.user.id,
-                   'first_name': request.user.first_name, 'last_name': request.user.last_name})
+                   'first_name': request.user.first_name, 'last_name': request.user.last_name, 'my_delay': delay[-1]})
 
 
 def control_save(request):
@@ -2457,6 +2464,9 @@ def control_save(request):
     dev_3 = request.POST.get('device_3')
     print("dev_3 =")
     print(dev_3)
+    my_delay = request.POST['delay']
+    print('my_delay = ')
+    print(my_delay)
     # comment = request.POST.get('text')
     comment = request.POST['text']
     print('comment = ')
@@ -2483,7 +2493,7 @@ def control_save(request):
 
     now = timezone.now()
     m = my_control(user_id=request.user.id, dev_1=d1, dev_2=d2, dev_3=d3, comment=comment, phone='+7 (495) 777-77-77',
-                   datetime=now, identificator=ident)
+                   datetime=now, identificator=ident, my_delay = my_delay)
     m.save()
     acc = account_check(request)
     return render(request, 'ai/start.html', {'Acc': acc})
@@ -2553,6 +2563,7 @@ def my_condition_2(request):
     dev_1 = []
     dev_2 = []
     dev_3 = []
+    delay = []
 
     try:
         print("control = ")
@@ -2567,6 +2578,13 @@ def my_condition_2(request):
             dev_1.append(c.dev_1)
             dev_2.append(c.dev_2)
             dev_3.append(c.dev_3)
+            delay.append(c.my_delay)
+
+        if len(dev_1) == 0:
+            dev_1.append("False")
+            dev_2.append("False")
+            dev_3.append("False")
+            delay.append(0)
 
         print ('dev_1[-1] = ')
         print(dev_1[-1])
@@ -2574,6 +2592,8 @@ def my_condition_2(request):
         print(dev_2[-1])
         print('dev_3[-1] = ')
         print(dev_3[-1])
+        print('delay[-1] = ')
+        print(delay[-1])
 
         if dev_1[-1] == False or dev_1[-1] == None:
             d1 = 'fals'
@@ -2588,13 +2608,14 @@ def my_condition_2(request):
         else:
             d3 = 'true'
 
-        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login}
+        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1]}
         print("my_condition_2.vocab = ")
         print(vocab)
         return (vocab)
+
     except:
         # raise Http404("отсутствуют данные об управляющем состоянии для комплекта оборудования " + login)
-        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login}
+        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0}
         print('my_condition_2.except:')
         print(vocab)
         return (vocab)

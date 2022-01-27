@@ -89,6 +89,7 @@ class my_control(models.Model):
     comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
     identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
     datetime = models.DateTimeField('дата действия')
+    my_delay = models.IntegerField(verbose_name='Интервал между измерениями в секундах', default=0)
 
     def __str__(self):
         #return 'Управляющее действие: {}'.format(self.user.username)
