@@ -2625,10 +2625,15 @@ def my_condition_2(request):
             return (vocab)
 
         except:
-            vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption':'True'}
             print('my_condition_2.except:')
-            print(vocab)
-            return (vocab)
+            vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
+
+    vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
+
+    print(vocab)
+    return (vocab)
+
+
 
 def my_condition_3(request):
     # возникает ошибка, если управляющий вектор не задан. Например при первом использовании нового комплекта аппаратуры
@@ -2651,7 +2656,8 @@ def my_condition_3(request):
 
         except:
             print('from my_condition_3 except:')
-            return Response({"add": "wrong codeword - data rejected"})
+            vocab = {"add": "wrong codeword - data rejected"}
+            return JsonResponse(vocab, safe=False)
 
     if f == pasw or password[login] == pasw:
         nameandpaswcorrect = True
