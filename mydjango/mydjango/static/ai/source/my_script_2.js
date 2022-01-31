@@ -74,17 +74,17 @@
 
 				for (var i = 0; i < chizm; ++i) {
 					d1.push([i, response[i]]);
-					d2.push([i, 32.5]);					
+					d2.push([i, response[i]]);					
 				}
 
 				for (var i = chizm; i < 2*chizm; ++i) {
 					d3.push([i-chizm, response[i]]);
-					d4.push([i-chizm, 63.5]);
+					d4.push([i-chizm, response[i]]);
 				}
 
 				for (var i = 2*chizm; i < 3*chizm; ++i) {
 					d5.push([i-2*chizm, response[i]]);
-					d6.push([i-2*chizm, critic]);
+					d6.push([i-2*chizm, response[i]]);
 				}
 				 data1 = [ d1, d2 ];
 				 
