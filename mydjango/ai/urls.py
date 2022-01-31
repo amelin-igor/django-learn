@@ -47,6 +47,7 @@ urlpatterns = [
     path('control/', views.control, name='control_page'),
     path('control_save/', views.control_save, name='control_save_page'),
     path('my_condition/', views.my_condition, name='my_condition_page'),
+    path('my_condition_2/', views.my_condition_2, name='my_condition_2_page'),
     path('my_control/', views.my_controlView.as_view(), name='my_control_page'),
     path('test_js/', views.test_js, name='test_js_page'),
     path('test_js2/', views.test_js2, name='test_js_page2'),
