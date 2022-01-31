@@ -2630,8 +2630,93 @@ def my_condition_2(request):
             print(vocab)
             return (vocab)
 
+def my_condition_3(request):
+    # возникает ошибка, если управляющий вектор не задан. Например при первом использовании нового комплекта аппаратуры
+    # нужно это предусмотреть
+    # для микроконтроллера с реле
+    print("my_condition_3")
+    login = request.GET.get('login')
+    pasw = request.GET.get('pasw')
+    print("login = ")
+    print(login)
+
+    if login != "00001":
+        try:
+            q = Customerrec.objects.filter(identificator=login)
+
+            for LI in q:
+                f = LI.comment
+            print('codeword =')
+            print(f)
+
+        except:
+            print('from my_condition_3 except:')
+            return Response({"add": "wrong codeword - data rejected"})
+
+    if f == pasw or password[login] == pasw:
+        nameandpaswcorrect = True
+
+    if nameandpaswcorrect == True:
+        dev_1 = []
+        dev_2 = []
+        dev_3 = []
+        delay = []
+
+        try:
+            print("control = ")
+            a = my_control.objects.filter(identificator=str(login))
+            print('a=')
+            print(a)
+            control = a.order_by('id')
+            print('a=')
+            print(a)
+
+            for c in control:
+                dev_1.append(c.dev_1)
+                dev_2.append(c.dev_2)
+                dev_3.append(c.dev_3)
+                delay.append(c.my_delay)
+
+            if len(dev_1) == 0:
+                dev_1.append("False")
+                dev_2.append("False")
+                dev_3.append("False")
+                delay.append(0)
+
+            print ('dev_1[-1] = ')
+            print(dev_1[-1])
+            print('dev_2[-1] = ')
+            print(dev_2[-1])
+            print('dev_3[-1] = ')
+            print(dev_3[-1])
+            print('delay[-1] = ')
+            print(delay[-1])
+
+            if dev_1[-1] == False or dev_1[-1] == None:
+                d1 = 'fals'
+            else:
+                d1 = 'true'
+            if dev_2[-1] == False or dev_2[-1] == None:
+                d2 = 'fals'
+            else:
+                d2 = 'true'
+            if dev_3[-1] == False or dev_3[-1] == None:
+                d3 = 'fals'
+            else:
+                d3 = 'true'
+
+            vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1], 'exeption':'False'}
+            print("my_condition_3.vocab = ")
+            print(vocab)
+            return JsonResponse(vocab, safe=False)
+            #20223101
 
 
+        except:
+            print('my_condition_3.except:')
+
+    vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
+    return JsonResponse(vocab, safe=False)
 
 class my_controlView(APIView):
     def get(self, request):
