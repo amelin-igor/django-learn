@@ -2550,88 +2550,58 @@ def my_condition_2(request):
     # нужно это предусмотреть
     print("my_condition_2")
     login = request.GET.get('login')
-    pasw = request.GET.get('pasw')
+
     print("login = ")
     print(login)
+    dev_1 = []
+    dev_2 = []
+    dev_3 = []
+    delay = []
 
-    if login != "00001":
-        try:
-            q = Customerrec.objects.filter(identificator=login)
+    try:
+        print("control = ")
+        a = my_control.objects.filter(identificator=str(login))
+        print('a=')
+        print(a)
+        control = a.order_by('id')
+        print('a=')
+        print(a)
 
-            for LI in q:
-                f = LI.comment
-            print('codeword =')
-            print(f)
+        for c in control:
+            dev_1.append(c.dev_1)
+            dev_2.append(c.dev_2)
+            dev_3.append(c.dev_3)
+            delay.append(c.my_delay)
 
-        except:
-            print('from my_condition_2 except:')
-            return Response({"add": "wrong codeword - data rejected"})
+        if len(dev_1) == 0:
+            dev_1.append("False")
+            dev_2.append("False")
+            dev_3.append("False")
+            delay.append(0)
 
-    if f == pasw or password[login] == pasw:
-        nameandpaswcorrect = True
+        if dev_1[-1] == False or dev_1[-1] == None:
+            d1 = 'fals'
+        else:
+            d1 = 'true'
+        if dev_2[-1] == False or dev_2[-1] == None:
+            d2 = 'fals'
+        else:
+            d2 = 'true'
+        if dev_3[-1] == False or dev_3[-1] == None:
+            d3 = 'fals'
+        else:
+            d3 = 'true'
 
-    if nameandpaswcorrect == True:
-        dev_1 = []
-        dev_2 = []
-        dev_3 = []
-        delay = []
+        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1], 'exeption':'False'}
+        print("my_condition_2.vocab = ")
+        print(vocab)
+        return (vocab)
 
-        try:
-            print("control = ")
-            a = my_control.objects.filter(identificator=str(login))
-            print('a=')
-            print(a)
-            control = a.order_by('id')
-            print('a=')
-            print(a)
-
-            for c in control:
-                dev_1.append(c.dev_1)
-                dev_2.append(c.dev_2)
-                dev_3.append(c.dev_3)
-                delay.append(c.my_delay)
-
-            if len(dev_1) == 0:
-                dev_1.append("False")
-                dev_2.append("False")
-                dev_3.append("False")
-                delay.append(0)
-
-            print ('dev_1[-1] = ')
-            print(dev_1[-1])
-            print('dev_2[-1] = ')
-            print(dev_2[-1])
-            print('dev_3[-1] = ')
-            print(dev_3[-1])
-            print('delay[-1] = ')
-            print(delay[-1])
-
-            if dev_1[-1] == False or dev_1[-1] == None:
-                d1 = 'fals'
-            else:
-                d1 = 'true'
-            if dev_2[-1] == False or dev_2[-1] == None:
-                d2 = 'fals'
-            else:
-                d2 = 'true'
-            if dev_3[-1] == False or dev_3[-1] == None:
-                d3 = 'fals'
-            else:
-                d3 = 'true'
-
-            vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1], 'exeption':'False'}
-            print("my_condition_2.vocab = ")
-            print(vocab)
-            return (vocab)
-
-        except:
-            print('my_condition_2.except:')
-            vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
-
-    vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
-
-    print(vocab)
-    return (vocab)
+    except:
+        print('my_condition_2.except:')
+        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
+        print(vocab)
+        return (vocab)
 
 
 
