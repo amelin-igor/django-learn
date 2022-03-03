@@ -221,8 +221,19 @@ def add(request):
                  meter_CO2=co2,
                  meter_CH4=ch4, meter_N2O=n2o, meter_datetime=now)
     m.save()
+    #if login == '1' and name == 'Device_1':
+    #    tmax = 10
+    #    if t > tmax:
+    #        now = timezone.now()
+    #        v1 = my_condition_2(request)
+    #        comment = 'отключено в связи с превышением установленного порога'
+    #        m3 = my_control(user_id=request.user.id, dev_1='False', dev_2=v1['dev_2'], dev_3=v1['dev_3'], comment=comment,
+    #                       phone='+7 (495) 777-77-77',
+    #                       datetime=now, identificator=login, my_delay=v1['my_delay'])
+    #        m3.save()
 
     v1 = my_condition_2(request)
+
 
     return JsonResponse(v1, safe=False)
 
@@ -2381,7 +2392,7 @@ def control(request):
     print(voc)
     ident = voc['ident']
     RegFF = voc['RFF']
-    if RegFF == False:
+    if RegFF == False and ident !="00001":
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
