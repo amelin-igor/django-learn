@@ -314,7 +314,7 @@ def starter(request, meter_title, chisizm):
     ident = voc['ident']
 
     RegFF = voc['RFF']
-    if RegFF == False and request.user.is_authenticated:
+    if RegFF == False and request.user.is_authenticated and ident !="00001":
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
@@ -632,7 +632,7 @@ def nabobj(request):
     ident = voc['ident']
 
     RegFF = voc['RFF']
-    if RegFF == False and request.user.is_authenticated:
+    if RegFF == False and request.user.is_authenticated and ident !="00001":
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
@@ -2858,7 +2858,7 @@ class my_dataView(APIView):
         print(ident)
 
         RegFF = voc['RFF']
-        if RegFF == False and request.user.is_authenticated:
+        if RegFF == False and request.user.is_authenticated and ident !="00001":
             codegen_emailsend(request)
             return render(request, 'ai/recvizits.html')
 
