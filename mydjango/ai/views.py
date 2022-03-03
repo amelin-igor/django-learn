@@ -235,7 +235,7 @@ def add(request):
     v1 = my_condition_2(request)
 
     if v1["identificator"] == "00001" and name == "Vestka":
-        if co2 > 70:
+        if int(co2) > 70:
             v1["dev_1"] = True
 
     return JsonResponse(v1, safe=False)
