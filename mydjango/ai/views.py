@@ -2461,7 +2461,7 @@ def control_save(request):
     voc = get_ident(request)
     ident = voc['ident']
     RegFF = voc['RFF']
-    if RegFF == False:
+    if RegFF == False and ident !="00001":
         codegen_emailsend(request)
         return render(request, 'ai/recvizits.html')
 
