@@ -462,14 +462,14 @@ def starter(request, meter_title, chisizm):
     t_max = np.max(y10)
     t_min = np.min(y10)
 
-    h_max = np.mean(y20)
-    h_min = np.mean(y20)
+    h_max = np.max(y20)
+    h_min = np.min(y20)
     h_median = np.median(y20)
     h_mean = np.mean(y20)
     h_std = np.std(y20)
 
-    g_max = np.std(y40)
-    g_min = np.std(y40)
+    g_max = np.max(y40)
+    g_min = np.min(y40)
     g_median = np.median(y40)
     g_mean = np.mean(y40)
     g_std = np.std(y40)
