@@ -388,7 +388,7 @@ def starter(request, meter_title, chisizm):
         #gas_name = 'UnKnown gas'
         gas_name = 'gas'
 
-    nabobj_name = def_comment(name_cow)
+    nabobj_name = def_comment(request, name_cow)
 
     x1 = range(len(y1))
     print(len(y1))
