@@ -3142,11 +3142,13 @@ def save_dev(request):
 
 
 
-def def_comment(name_cow):
+def def_comment(request, name_cow):
     print('def_comment...')
+
+
     try:
         print('try...')
-        q = device.objects.filter(devname=name_cow)
+        q = device.objects.filter(user_id=request.user.id, devname=name_cow)
         my_dev = q.order_by('datetime')
         comment = []
         for LI in my_dev:
