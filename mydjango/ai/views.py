@@ -647,23 +647,39 @@ def nabobj(request):
     X = []
     for cow in cow_metering_list:
         X.append(cow.meter_title)
+        #print(cow.meter_title)
     XM = set(X)
     y = sorted(list(XM))
     print('sorted(list(XM))=')
     print(y)
 
-    return render(request, 'ai/nabobj.html', {'cow_metering_list': y})
+    com = []
+    dc = []
+    for name in y:
+        dev = device.objects.filter(identificator=ident, devname=name)
+        for c in dev:
+            #dc = [c.comment,c.devname,c.mac]
+            dc = [c.comment, c.devname, c.mac]
+
+        #com[dn] = dc
+        com.append(dc)
+
+    print(com)
+
+
+
+    return render(request, 'ai/nabobj.html', {'cow_metering_list': y, 'com':com})
 
 
 def cows(request, meter_title, chisizm):
     print('cows ')
-    chisizm_from_post = request.POST.get('chisizm')
-    print('chisizm from POST = ')
-    print(chisizm_from_post)
-    print('meter_title = ')
-    print(meter_title)
-    if chisizm_from_post == None:
-        chisizm_from_post = chisizm
+    #chisizm_from_post = request.POST.get('chisizm')
+    print('chisizm = ')
+    print(chisizm)
+    #print('meter_title = ')
+    #print(meter_title)
+    #if chisizm_from_post == None:
+    chisizm_from_post = chisizm
 
     return HttpResponseRedirect(reverse('ai:starter', args=(meter_title, chisizm_from_post)))
 
@@ -2573,13 +2589,13 @@ def my_condition_2(request):
     delay = []
 
     try:
-        print("control = ")
+        #print("control = ")
         a = my_control.objects.filter(identificator=str(login))
-        print('a=')
-        print(a)
+        #print('a=')
+        #print(a)
         control = a.order_by('id')
-        print('a=')
-        print(a)
+        #print('a=')
+        #print(a)
 
         for c in control:
             dev_1.append(c.dev_1)
@@ -2653,13 +2669,13 @@ def my_condition_3(request):
         delay = []
 
         try:
-            print("control = ")
+            #print("control = ")
             a = my_control.objects.filter(identificator=str(login))
             print('a=')
             print(a)
             control = a.order_by('id')
-            print('a=')
-            print(a)
+            #print('a=')
+            #print(a)
 
             for c in control:
                 dev_1.append(c.dev_1)
@@ -3061,59 +3077,64 @@ def save_dev(request):
     now = timezone.now()
     mac = request.POST.get('mac')
     comment = request.POST.get('comment')
+    devname_new = 'NoName'
+    if not request.user.is_superuser:
 
-    print('len(mac) = ')
-    print(len(mac))
+        print('len(mac) = ')
+        print(len(mac))
 
+        try:
+            print('try...')
+            q = device.objects.filter(user_id=request.user.id)
+            my_dev = q.order_by('datetime')
 
+            ident = []
+            devname = []
 
-    try:
-        print('try...')
-        q = device.objects.filter(user_id=request.user.id)
-        my_dev = q.order_by('datetime')
+            for LI in my_dev:
+                ident.append(LI.identificator)
+                devname.append (LI.devname)
 
-        ident = []
-        devname = []
+            print('ident =')
+            print(ident[-1])
+            print('devname =')
+            print(devname[-1])
 
-        for LI in my_dev:
-            ident.append(LI.identificator)
-            devname.append (LI.devname)
-
-        print('ident =')
-        print(ident[-1])
-        print('devname =')
-        print(devname[-1])
-
-    except:
-        print('except:')
-        return Response({"save_dev_try": "No data (identificator or devname)"})
-
-
-
-    devname_new = 'Device_' + str(len(devname)+1)
-
-    if len(mac)!=17:
-        msg = "Внимание! Некорректно указан MAC-адрес, пожалуйста, повторите ввод"
-        return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
-
-    maci=[]
-    try:
-        q = device.objects.filter(mac=mac)
-        for LI in q:
-            maci.append(LI.mac)
+        except:
+            print('except:')
+            #return Response({"save_dev_try": "No data (identificator or devname)"})
+            msg = "нет зарегистрированных устройств"
+            return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
 
 
-    except:
-        print('нет такого MAC - заносим')
 
-    if len(maci) >0:
-        msg = "Внимание! Устройство с таким MAC-адресом уже зарегистрировано. Возможно некорректно указан MAC-адрес, пожалуйста, повторите ввод"
-        return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
+        devname_new = 'Device_' + str(len(devname)+1)
+        if len(mac)!=17:
+            msg = "Внимание! Некорректно указан MAC-адрес, пожалуйста, повторите ввод"
+            return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
 
-    m = device(comment=comment, devname=devname_new, datetime=now, identificator=ident[-1], mac=mac,
-                user_id=request.user.id)
+        maci=[]
+        try:
+            q = device.objects.filter(mac=mac)
+            for LI in q:
+                maci.append(LI.mac)
+
+
+        except:
+            print('нет такого MAC - заносим')
+
+        if len(maci) >0:
+            msg = "Внимание! Устройство с таким MAC-адресом уже зарегистрировано. Возможно некорректно указан MAC-адрес, пожалуйста, повторите ввод"
+            return render(request, 'ai/update_dev.html', {"dev": my_dev, 'msg': msg})
+
+    else: #not request.user.is_superuser
+        devname_new = request.POST.get('devname')
+        identificator = "00001"
+        mac = "30:83:98:A2:6B:50"
+
+    m = device(comment=comment, devname=devname_new, datetime=now, identificator=identificator, mac=mac,
+               user_id=request.user.id)
     m.save()
-
     #return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
     return render(request, 'ai/update_dev_done.html',{'devname':devname_new, "comment":comment, "mac":mac, "datetime": now})
 
@@ -3243,3 +3264,103 @@ def java_call(request):
         V_V[dev] = v1
 
     return JsonResponse(V_V, safe=False)
+
+
+def edit_dev(request):
+    print('edit_dev...')
+    now = timezone.now()
+    try:
+        print('try...')
+        q = device.objects.filter(user_id=request.user.id)
+        my_dev = q.order_by('datetime')
+
+        comment = []
+        ident = []
+        devname = []
+        mac = []
+        dt = []
+
+        for LI in my_dev:
+            comment.append(LI.comment)
+            ident.append(LI.identificator)
+            devname.append (LI.devname)
+            mac.append(LI.mac)
+            dt.append(LI.datetime)
+
+        print('comment =')
+        print(comment[-1])
+        print('devname =')
+        print(devname[-1])
+        print('mac =')
+        print(mac[-1])
+        # 30:83:98:A2:6B:51
+
+    except:
+        print('except:')
+        # return Response({"update_dev_try": "No data (identificator or devname)"})
+
+
+
+    #return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
+    return render(request, 'ai/edit_dev.html', {"dev": my_dev})
+
+def start_edit(request, dev_name):
+    print('start_edit')
+    #my_dev_name = request.POST.get('dev_name')
+    my_dev_name = dev_name
+    print('my_dev_name = ')
+    print(my_dev_name)
+    now = timezone.now()
+
+    try:
+        print('try...')
+        q = device.objects.filter(user_id=request.user.id, devname=my_dev_name)
+        my_dev = q.order_by('datetime')
+
+        comment = []
+        ident = []
+        devname = []
+        mac = []
+        dt = []
+
+        for LI in my_dev:
+            comment.append(LI.comment)
+            ident.append(LI.identificator)
+            devname.append(LI.devname)
+            mac.append(LI.mac)
+            dt.append(LI.datetime)
+
+        print('comment =')
+        print(comment[-1])
+        print('devname =')
+        print(devname[-1])
+        print('mac =')
+        print(mac[-1])
+        # 30:83:98:A2:6B:51
+
+    except:
+        print('except:')
+
+    return render(request, 'ai/edit_dev_one.html', {"dev": my_dev, 'devname':my_dev_name, 'comment':comment[-1]})
+
+def save_edit_dev(request):
+    print('save_edit_dev')
+    now = timezone.now()
+    new_comment = request.POST.get('comment')
+    dev_name = request.POST.get('devname')
+    print('new_comment = ')
+    print(new_comment)
+    print('dev_name=')
+    print(dev_name)
+
+    try:
+        obj = device.objects.get(user_id=request.user.id, devname=dev_name)
+        obj.comment = new_comment
+        mac = obj.mac
+        obj.save()
+    except:
+        print('except:')
+
+    # return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
+    return render(request, 'ai/edit_dev_done.html',
+                  {'devname': dev_name, "comment": new_comment, "mac": mac, "datetime": now})

@@ -60,6 +60,11 @@ urlpatterns = [
     path('update_dev/', views.update_dev, name='update_dev_page'),
     path('save_dev/', views.save_dev, name='save_dev_page'),
     path('java_call/', views.java_call, name='java_call_page'),
+    path('edit_dev/', views.edit_dev, name='edit_dev_page'),
+    path('start_edit/<str:dev_name>/', views.start_edit, name='start_edit_page'),
+    path('save_edit_dev', views.save_edit_dev, name='save_edit_dev_page'),
+
+
 
 
 ]

@@ -140,6 +140,8 @@
                         {% url 'ai:mail_page' as url_mail %}
                         {% url 'ai:control_page' as url_cont %}
                         {% url 'ai:update_dev_page' as url_update_dev %}
+                        {% url 'ai:edit_dev_page' as url_edit_dev %}
+
 
                         {% if request.user.is_superuser %}
                          <a class="dropdown-item" href="{{url_deposit}}">Пополнение базы данных</a>
@@ -150,6 +152,7 @@
 
                      <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{url_update_dev}}">Добавить устройство</a>
+                        <a class="dropdown-item" href="{{url_edit_dev}}">Редактировать устройство</a>
                         <a class="dropdown-item" href="{{url_mail}}">Отправить e-mail</a>
                     </div>
                     </li>

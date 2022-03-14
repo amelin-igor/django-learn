@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Датчики{% endblock %}
+
+{% block content %}
+
+<style type='text/css'>
+	input, textarea {border-color: red; }
+</style>
+
+{% if request.user.is_authenticated %}
+
+    <h5> Редактирование датчика </h5>
+
+
+</br>
+<hr>
+    <h5> Список зарегистрированных датчиков </h5>
+                            {% if dev %}
+                                {% for c in dev %}
+                                    <p>
+                                         </br>
+                                        <a href="{% url 'ai:start_edit_page' c.devname %}">-{{c.devname }} | {{ c.datetime | date:"Y-m-d H:i:s"}} | MAC-адрес ={{c.mac}} | {{c.comment }}</a>
+
+                                    </p>
+                                {% endfor %}
+
+                            {% else %}
+                                    зарегистрированных датчиков не найдено
+                            {% endif %}
+    </hr>
+
+
+
+<div class="col-12">
+    <form action = "{% url 'ai:save_edit_dev_page' %}" method = "POST">
+
+        {% csrf_token %}
+
+        <input id="devname" name="devname" type="text" placeholder="devname"  value="{{devname}}"   >  - имя устройства только для суперюзера (например: Francheska)  </br>
+         </br>
+
+        <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment}}"   >  - описание устройства (например: датчик на кухне)  </br>
+        </br>
+
+        <hr>
+
+        <input class="btn btn-primary" type="submit" value="Сохранить"> {{msg}}
+
+        <hr>
+    </form>
+
+    </div>
+
+{% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+
+
+
+
+{% endblock %}

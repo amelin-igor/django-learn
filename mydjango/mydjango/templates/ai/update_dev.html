@@ -24,7 +24,7 @@
                                 {% endfor %}
 
                             {% else %}
-                                    зарегистрированных датчиков не надено
+                                    зарегистрированных датчиков не найдено
                             {% endif %}
 
 
@@ -40,8 +40,13 @@
 
         <input id="mac" name="mac" type="text" placeholder="MAC - адрес устройства" value="{{mac_2}}">   - идентификатор устройства (MAC-адрес подключаемого устройства) </br>
         </br>
-        <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment_2}}"   >  - название устройства (например: датчик на кухне)  </br>
+        <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment_2}}"   >  - описание устройства (например: датчик на кухне)  </br>
         </br>
+        {% if request.user.is_superuser %}
+             <input id="devname" name="devname" type="text" placeholder="devname"  value="{{devname_2}}"   >  - имя устройства только для суперюзера (например: Francheska)  </br>
+            </br>
+        {% endif %}
+
 
         <hr>
 

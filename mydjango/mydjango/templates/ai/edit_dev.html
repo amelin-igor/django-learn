@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Датчики{% endblock %}
+
+{% block content %}
+
+<style type='text/css'>
+	input, textarea {border-color: red; }
+</style>
+
+{% if request.user.is_authenticated %}
+
+    <h5> Выберите датчик для редактирования </h5>
+</br>
+<hr>
+
+                            {% if dev %}
+                                {% for c in dev %}
+                                    <p>
+                                         </br>
+                                        <a href="{% url 'ai:start_edit_page' c.devname %}">-{{c.devname }} | {{ c.datetime | date:"Y-m-d H:i:s"}} | MAC-адрес: {{c.mac}} | {{c.comment }}</a>
+
+                                    </p>
+                                {% endfor %}
+
+                            {% else %}
+                                    зарегистрированных датчиков не найдено
+                            {% endif %}
+
+    </hr>
+
+
+{% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+
+
+
+
+{% endblock %}

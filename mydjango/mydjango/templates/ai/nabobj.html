@@ -16,8 +16,43 @@
    {% else %}
      Объекты отсутствуют. Зарегистрируйте наблюдаемый объект в системе.
    {% endif %}
+<hr>
+<h4> Состав используемого оборудования </h4>
+
+<hr>
+<div class="row">
+    <div class="col">
+       Название устройста
+    </div>
+    <div class="col">
+       Описание устройства
+    </div>
+    <div class="col">
+      MAC - адрес устройства
+    </div>
+</div>
 
 
+
+<hr>
+    {% if com %}
+       {% for c in com  %}
+
+<div class="row">
+
+    <div class="col">
+        {{c.1}}
+    </div>
+    <div class="col">
+        {{c.0}}
+    </div>
+    <div class="col">
+      {{c.2}}
+    </div>
+</div>
+       {% endfor %}
+
+    {% endif %}
 
 {% endblock %}
 

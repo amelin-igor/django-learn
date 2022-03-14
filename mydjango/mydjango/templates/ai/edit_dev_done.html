@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Датчики{% endblock %}
+
+{% block content %}
+
+<style type='text/css'>
+	input, textarea {border-color: red; }
+</style>
+
+{% if request.user.is_authenticated %}
+
+    <h6> Редактирование датчика {{devname}}({{comment}}) MAC-адрес {{mac}} выполнено в {{datetime}}</h6>
+
+</br>
+    </hr>
+
+{% else %}
+       Для продолжения требуется авторизация
+{% endif %}
+
+
+
+
+
+
+{% endblock %}
