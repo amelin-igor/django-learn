@@ -459,18 +459,36 @@ def starter(request, meter_title, chisizm):
     t_median = np.median(y10)
     t_mean = np.mean(y10)
     t_std = np.std(y10)
+    t_max = np.max(y10)
+    t_min = np.min(y10)
+
+    h_max = np.mean(y20)
+    h_min = np.mean(y20)
     h_median = np.median(y20)
     h_mean = np.mean(y20)
     h_std = np.std(y20)
+
+    g_max = np.std(y40)
+    g_min = np.std(y40)
     g_median = np.median(y40)
     g_mean = np.mean(y40)
     g_std = np.std(y40)
+
     t_mean = toFixed(t_mean, 2)
     t_std = toFixed(t_std, 2)
+    t_max = toFixed(t_max, 2)
+    t_min = toFixed(t_min, 2)
+
     h_mean = toFixed(h_mean, 2)
     h_std = toFixed(h_std, 2)
+    h_max = toFixed(h_max, 2)
+    h_min = toFixed(h_min, 2)
+
     g_mean = toFixed(g_mean, 2)
     g_std = toFixed(g_std, 2)
+    g_max = toFixed(g_max, 2)
+    g_min = toFixed(g_min, 2)
+
     corr_t_h = np.corrcoef(y10, y20)[1, 0]
     corr_t_h = toFixed(corr_t_h, 4)
     corr_t_g = np.corrcoef(y10, y40)[1, 0]
@@ -546,12 +564,18 @@ def starter(request, meter_title, chisizm):
                                                't_median': t_median,
                                                't_mean': t_mean,
                                                't_std': t_std,
+                                               't_max': t_max,
+                                               't_min': t_min,
                                                'h_median': h_median,
                                                'h_mean': h_mean,
                                                'h_std': h_std,
+                                                   'h_max': h_max,
+                                                   'h_min': h_min,
                                                'g_median': g_median,
                                                'g_mean': g_mean,
                                                'g_std': g_std,
+                                                   'g_max': g_max,
+                                                   'g_min': g_min,
                                                'corr_t_h': corr_t_h,
                                                'corr_t_g': corr_t_g,
                                                'corr_h_g': corr_h_g,
