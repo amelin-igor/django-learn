@@ -1,5 +1,5 @@
 # from bokeh.models import Scatter
-import logging
+#import logging
 
 from bokeh.embed import components
 from bokeh.plotting import figure, curdoc
@@ -145,6 +145,7 @@ def page2(request):
 def add(request):
     print('add')
     f = "234"
+    a = 'NaN'
     # now = datetime.datetime.now()
     now = timezone.now()
     nameandpaswcorrect = False
@@ -182,64 +183,54 @@ def add(request):
 
         if nameandpaswcorrect == True:
             a = 'YES_'
-            logging.info('user: ' + login)
-            if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
-                cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                    'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
-                             data + ' / ' + '\n')
-            else:
-                cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                    'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
-                             "data" + ' / ' + '\n')
+            #logging.info('user: ' + login)
+            #if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+                #cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                #    'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
+            #             data + ' / ' + '\n')
+            #else:
+                #cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
+                # 'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
+                #           "data" + ' / ' + '\n')
                 # if behind a proxy
         else:
             a = 'Wrong user credentials!_'
-            logging.warning('user ' + login + ': Wrong user credentials!')
+            #logging.warning('user ' + login + ': Wrong user credentials!')
             if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
                 cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                    'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
-                             data + ' / ' + ': Wrong user credentials!' + '\n')
+               'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
+                     data + ' / ' + ': Wrong user credentials!' + '\n')
             else:
                 cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                    'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
-                             data + ' / ' + ': Wrong user credentials!' + '\n')
+                 'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
+                            data + ' / ' + ': Wrong user credentials!' + '\n')
                 # if behind a proxy
 
     except ValueError:
-        logging.warning('user ' + login + ': Wrong user name_' + '\n')
+        #logging.warning('user ' + login + ': Wrong user name_' + '\n')
         if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
             cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
-                'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
-                         data + ' / ' + ': Wrong user name!' + '\n')
+             'REMOTE_ADDR'] + ' / ' + pcname + ' / ' +
+                  data + ' / ' + ': Wrong user name!' + '\n')
         else:
             cowlog.write('user: ' + login + ' ' + str(now) + ' IP:' + request.environ[
                 'HTTP_X_FORWARDED_FOR'] + ' / ' + pcname + ' / ' +
-                         data + ' / ' + ': Wrong user name!' + '\n')
+                        data + ' / ' + ': Wrong user name!' + '\n')
 
-
-    m = Metering(meter_identificator=login, meter_title=name, meter_text=mt, meter_temperature=t, meter_humidity=h,
+    if nameandpaswcorrect == True:
+        m = Metering(meter_identificator=login, meter_title=name, meter_text=mt, meter_temperature=t, meter_humidity=h,
                  meter_CO2=co2,
                  meter_CH4=ch4, meter_N2O=n2o, meter_datetime=now)
-    m.save()
-    #if login == '1' and name == 'Device_1':
-    #    tmax = 10
-    #    if t > tmax:
-    #        now = timezone.now()
-    #        v1 = my_condition_2(request)
-    #        comment = 'отключено в связи с превышением установленного порога'
-    #        m3 = my_control(user_id=request.user.id, dev_1='False', dev_2=v1['dev_2'], dev_3=v1['dev_3'], comment=comment,
-    #                       phone='+7 (495) 777-77-77',
-    #                       datetime=now, identificator=login, my_delay=v1['my_delay'])
-    #        m3.save()
+        m.save()
+        v1 = my_condition_2(request)
 
-    v1 = my_condition_2(request)
+        if v1["identificator"] == "00001" and name == "Vestka":
+            if int(co2) > 70:
+                v1["dev_1"] = True
 
-    if v1["identificator"] == "00001" and name == "Vestka":
-        if int(co2) > 70:
-            v1["dev_1"] = True
-
-    return JsonResponse(v1, safe=False)
-
+        return JsonResponse(v1, safe=False)
+    else:
+        return a
 
 def show(request):
     q = Metering.objects.filter(meter_title="Mumuka")
@@ -320,7 +311,7 @@ def starter(request, meter_title, chisizm):
 
     print(now)
 
-    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=30)).delete()
+    Metering.objects.filter(meter_datetime__lte=timezone.now() - timezone.timedelta(days=5)).delete()
     now = timezone.now()
     print(now)
 
@@ -330,6 +321,7 @@ def starter(request, meter_title, chisizm):
         print(now)
     except:
         raise Http404("Нет запрашиваемых данных")
+        print("Нет запрашиваемых данных")
     y3 = []
 
     for data in q:
@@ -337,6 +329,13 @@ def starter(request, meter_title, chisizm):
     len_all = len(y3)
     print('len_all=')
     print(len_all)
+
+    if len_all == 0:
+        #raise Http404("Нет запрашиваемых данных")
+        print("Нет запрашиваемых данных")
+        a = "Нет запрашиваемых данных"
+        z = {"a": a}
+        return render(request, 'ai/graph1.html', z)
 
     latest_data_list = q.order_by('-meter_datetime')[:chisizm]
     z = {'metter_of_buryonka': latest_data_list}
@@ -648,6 +647,10 @@ def index2(request):
 
 
 def nabobj(request):
+    import sqlite3
+    conn = sqlite3.connect('db.sqlite3', isolation_level=None)
+    conn.execute("VACUUM")
+    conn.close()
     # ident = get_ident(request)
     voc = get_ident(request)
     print('voc = ')
