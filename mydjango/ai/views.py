@@ -648,7 +648,7 @@ def index2(request):
 
 def nabobj(request):
     import sqlite3
-    conn = sqlite3.connect('db.sqlite3', isolation_level=None)
+    conn = sqlite3.connect('mydjango/db.sqlite3', isolation_level=None)
     conn.execute("VACUUM")
     conn.close()
     # ident = get_ident(request)
