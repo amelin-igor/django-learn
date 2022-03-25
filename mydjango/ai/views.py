@@ -3196,6 +3196,9 @@ def java_call(request):
     login = request.GET.get('login')
     print("login = ")
     print(login)
+    now = timezone.now()
+    V_V = {}
+    info=''
 
     try:
         print('try...')
@@ -3207,6 +3210,13 @@ def java_call(request):
 
         print('devname =')
         print(devname)
+        if len(devname) == 0:
+            print("Нет комплекта с запрашиваемым номером")
+            info = "No Data"
+            v1 = {'my_time': now, 'temperature': 0, "humidity": 0, 'gaz': 0,
+                  'identificator': login, 'info':info}
+            V_V['name'] = v1
+            return JsonResponse(V_V, safe=False)
         # z = comment[-1]
 
     except:
@@ -3219,7 +3229,7 @@ def java_call(request):
     y2_last = 0
     y4_last = 0
 
-    V_V = {}
+
     for dev in devname:
         try:
             q = Metering.objects.filter(meter_title=dev, meter_identificator=login)
@@ -3288,11 +3298,11 @@ def java_call(request):
         #print(temp_1)
         #v2 = { dev : v1}
 
-        v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last, 'identificator': login}
+        v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last, 'identificator': login, 'info':info}
         #V_V.append(v2)
         V_V[dev] = v1
     V_V['name'] = v1
-    
+
     return JsonResponse(V_V, safe=False)
 
 
