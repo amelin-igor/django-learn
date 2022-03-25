@@ -3301,7 +3301,10 @@ def java_call(request):
         v1  =  {'my_time': date_last, 'temperature': y1_last, "humidity": y2_last, 'gaz': y4_last, 'identificator': login, 'info':info}
         #V_V.append(v2)
         V_V[dev] = v1
+        print(V_V[dev])
+
     V_V['name'] = v1
+    print(V_V['name'])
 
     return JsonResponse(V_V, safe=False)
 
