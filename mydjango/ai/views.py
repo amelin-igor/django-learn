@@ -109,7 +109,6 @@ password = {
 
 def telegram_bot_sendtext(bot_message):
 
-   #bot_token = '5295526208:AAGO59zVfKFJM00l9wOWF5I5FwWtjMuS3U8' #bot token from botfather
    bot_token = TOKEN
    mybot_chatID = bot_chatID
    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + mybot_chatID + '&parse_mode=Markdown&text=' + bot_message
