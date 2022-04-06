@@ -50,7 +50,7 @@ from sendgrid.helpers.mail import Mail
 from datetime import datetime, timedelta
 
 import requests
-from .config import TOKEN, bot_chatID
+from .config import TOKEN, bot_chatID, snd_GRID
 
 
 
@@ -2321,15 +2321,14 @@ def send_codeword(request, codeword):
             html_content = data)
         try:
             # sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY2'))
-            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'cw.txt')
-            f = open(path, 'r')
-            cw = f.read()
-            f.close()
-            SENDGRID_API_KEY2 = cw
-            print(cw)
+            #path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'cw.txt')
+            #f = open(path, 'r')
+            #cw = f.read()
+            #f.close()
+            SENDGRID_API_KEY2 = snd_GRID
+            print('snd_GRID=')
+            print(snd_GRID)
             sg = SendGridAPIClient(SENDGRID_API_KEY2)
-            print('os.environ.get(my_pc_2) = ')
-            print(os.environ.get('SENDGRID_API_KEY'))
             response = sg.send(message)
             print(response.status_code)
             print(response.body)
