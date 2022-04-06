@@ -12,10 +12,7 @@
 
     <h5> Редактирование датчика </h5>
 
-
-</br>
 <hr>
-    <h5> Список зарегистрированных датчиков </h5>
                             {% if dev %}
                                 {% for c in dev %}
                                     <p>
@@ -41,6 +38,23 @@
          </br>
 
         <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment}}"   >  - описание устройства (например: датчик на кухне)  </br>
+        </br>
+
+        <input id="gazname" name="gazname" type="text" placeholder="gazname"  value="{{gazname}}"   >  - отслеживаемый газ (например: CH4, LPG или CO)  </br>
+        </br>
+        <input id="tmin" name="tmin" type="text" placeholder="tmin"  value="{{tmin}}"   >  - нижнее пороговое значение температуры (<sup>o</sup>C)  </br>
+        </br>
+        <input id="tmax" name="tmax" type="text" placeholder="tmax"  value="{{tmax}}"   >  - верхнее пороговое значение температуры (<sup>o</sup>C)  </br>
+        </br>
+
+        <input id="hmin" name="hmin" type="text" placeholder="hmin"  value="{{hmin}}"   >  - нижнее пороговое значение влажности воздуха (%)  </br>
+        </br>
+        <input id="hmax" name="hmax" type="text" placeholder="hmax"  value="{{hmax}}"   >  - верхнее пороговое значение влажности воздуха (%)  </br>
+        </br>
+
+        <input id="gmin" name="gmin" type="text" placeholder="gmin"  value="{{gmin}}"   >  - нижнее пороговое значение концентрации газа (ppm)  </br>
+        </br>
+        <input id="gmax" name="gmax" type="text" placeholder="gmax"  value="{{gmax}}"   >  - верхнее пороговое значение концентрации газа (ppm)  </br>
         </br>
 
         <hr>

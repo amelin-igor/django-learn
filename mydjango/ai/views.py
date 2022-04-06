@@ -49,6 +49,12 @@ from sendgrid.helpers.mail import Mail
 
 from datetime import datetime, timedelta
 
+import requests
+from .config import TOKEN, bot_chatID
+
+
+
+
 
 
 matplotlib.use('Agg')
@@ -100,6 +106,22 @@ password = {
 
 # def test(request):
 #    return HttpResponse("<h3>ТЕСТОВАЯ СТРАНИЦА ИСКУССТВЕННОГО ИНТЕЛЛЕКТА</h3>")
+
+def telegram_bot_sendtext(bot_message):
+
+   #bot_token = '5295526208:AAGO59zVfKFJM00l9wOWF5I5FwWtjMuS3U8' #bot token from botfather
+   bot_token = TOKEN
+   mybot_chatID = bot_chatID
+   send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + mybot_chatID + '&parse_mode=Markdown&text=' + bot_message
+
+   response = requests.get(send_text)
+
+   return response.json()
+
+
+#test = telegram_bot_sendtext("Testing Telegram bot")
+#print(test)
+
 
 def start(request):
     print('start')
@@ -218,15 +240,54 @@ def add(request):
                         data + ' / ' + ': Wrong user name!' + '\n')
 
     if nameandpaswcorrect == True:
+        #if name == 'Vestka':
+        #    g = int(co2) * 50
+        #    co2 = str(g)
         m = Metering(meter_identificator=login, meter_title=name, meter_text=mt, meter_temperature=t, meter_humidity=h,
                  meter_CO2=co2,
                  meter_CH4=ch4, meter_N2O=n2o, meter_datetime=now)
         m.save()
         v1 = my_condition_2(request)
+        v2 = read_maxmin(name, login)
+        print(v2)
 
-        if v1["identificator"] == "00001" and name == "Vestka":
-            if int(co2) > 70:
-                v1["dev_1"] = True
+        if int(t) > v2['tmax']:
+              test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": температура = " + t + ' C /'+ str(now))
+              print(test)
+              v1["dev_1"] = True  # включить лампоску Тревога
+        if int(h) > v2['hmax']:
+              test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' % /'+ str(now))
+              print(test)
+              v1["dev_1"] = True  # включить лампоску Тревога
+        if int(co2) > v2['gmax']:
+                test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm /'+ str(now))
+                print(test)
+                v1["dev_1"] = True #включить лампоску Тревога
+
+
+       # if (v1["identificator"] == "00001" and name == "Vestka") or (v1["identificator"] == "1" and name == "Device_5"):
+        #     if int(co2) > 70:
+        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm')
+        #        print(test)
+        #        v1["dev_1"] = True #включить лампоску Тревога
+        #elif v1["identificator"] == "1" and name == "Device_3":
+        #    if int(co2) > 260:
+        #        test = telegram_bot_sendtext(
+        #            "Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = " + co2 + ' ppm')
+        #        print(test)
+        #        v1["dev_1"] = True  # включить лампоску Тревога#
+
+
+        #else:
+        #    if int(t) > 35:
+        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": температура = " + t + ' C')
+        #        print(test)
+        #        v1["dev_1"] = True  # включить лампоску Тревога
+        #    if int(h) > 60:
+        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' %')
+        #        print(test)
+        #        v1["dev_1"] = True  # включить лампоску Тревога
+
 
         return JsonResponse(v1, safe=False)
     else:
@@ -700,13 +761,13 @@ def nabobj(request):
 
 def cows(request, meter_title, chisizm):
     print('cows ')
-    #chisizm_from_post = request.POST.get('chisizm')
+    chisizm_from_post = request.POST.get('chisizm')
     print('chisizm = ')
     print(chisizm)
     #print('meter_title = ')
     #print(meter_title)
-    #if chisizm_from_post == None:
-    chisizm_from_post = chisizm
+    if chisizm_from_post == None:
+        chisizm_from_post = chisizm
 
     return HttpResponseRedirect(reverse('ai:starter', args=(meter_title, chisizm_from_post)))
 
@@ -3104,6 +3165,15 @@ def save_dev(request):
     now = timezone.now()
     mac = request.POST.get('mac')
     comment = request.POST.get('comment')
+
+    gazname = request.POST.get('gazname')
+    tmin = request.POST.get('tmin')
+    tmax = request.POST.get('tmax')
+    hmin = request.POST.get('hmin')
+    hmax = request.POST.get('hmax')
+    gmin = request.POST.get('gmin')
+    gmax = request.POST.get('gmax')
+
     devname_new = 'NoName'
     if not request.user.is_superuser:
 
@@ -3160,7 +3230,7 @@ def save_dev(request):
         mac = "30:83:98:A2:6B:50"
 
     m = device(comment=comment, devname=devname_new, datetime=now, identificator=identificator, mac=mac,
-               user_id=request.user.id)
+               user_id=request.user.id, gazname=gazname, tmin=tmin, tmax=tmax, hmin=hmin, hmax=hmax, gmin=gmin, gmax=gmax)
     m.save()
     #return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
     return render(request, 'ai/update_dev_done.html',{'devname':devname_new, "comment":comment, "mac":mac, "datetime": now})
@@ -3365,6 +3435,14 @@ def start_edit(request, dev_name):
         devname = []
         mac = []
         dt = []
+        gazname = []
+        tmin = []
+        tmax = []
+        hmin = []
+        hmax = []
+        gmin = []
+        gmax = []
+
 
         for LI in my_dev:
             comment.append(LI.comment)
@@ -3372,6 +3450,14 @@ def start_edit(request, dev_name):
             devname.append(LI.devname)
             mac.append(LI.mac)
             dt.append(LI.datetime)
+            gazname.append(LI.gazname)
+
+            tmin.append(LI.tmin)
+            tmax.append(LI.tmax)
+            hmin.append(LI.hmin)
+            hmax.append(LI.hmax)
+            gmin.append(LI.gmin)
+            gmax.append(LI.gmax)
 
         print('comment =')
         print(comment[-1])
@@ -3384,13 +3470,32 @@ def start_edit(request, dev_name):
     except:
         print('except:')
 
-    return render(request, 'ai/edit_dev_one.html', {"dev": my_dev, 'devname':my_dev_name, 'comment':comment[-1]})
+    return render(request, 'ai/edit_dev_one.html', {"dev": my_dev, 'devname':my_dev_name,
+                                                    'comment':comment[-1],
+                                                    'gazname':gazname[-1],
+                                                    'tmin': tmin[-1],
+                                                    'tmax': tmax[-1],
+                                                    'hmin': hmin[-1],
+                                                    'hmax': hmax[-1],
+                                                    'gmin': gmin[-1],
+                                                    'gmax': gmax[-1],
+
+                                                    })
 
 def save_edit_dev(request):
     print('save_edit_dev')
     now = timezone.now()
     new_comment = request.POST.get('comment')
     dev_name = request.POST.get('devname')
+
+    gazname = request.POST.get('gazname')
+    tmin = request.POST.get('tmin')
+    tmax = request.POST.get('tmax')
+    hmin = request.POST.get('hmin')
+    hmax = request.POST.get('hmax')
+    gmin = request.POST.get('gmin')
+    gmax = request.POST.get('gmax')
+
     print('new_comment = ')
     print(new_comment)
     print('dev_name=')
@@ -3399,7 +3504,16 @@ def save_edit_dev(request):
     try:
         obj = device.objects.get(user_id=request.user.id, devname=dev_name)
         obj.comment = new_comment
+        obj.gazname = gazname
+        obj.tmin = tmin
+        obj.tmax = tmax
+        obj.hmin = hmin
+        obj.hmax = hmax
+        obj.gmin = gmin
+        obj.gmax = gmax
+
         mac = obj.mac
+
         obj.save()
     except:
         print('except:')
@@ -3407,3 +3521,69 @@ def save_edit_dev(request):
     # return render(request, 'ai/update_dev.html', {"comment":comment, "devname":devname, "mac":mac, "dt":dt })
     return render(request, 'ai/edit_dev_done.html',
                   {'devname': dev_name, "comment": new_comment, "mac": mac, "datetime": now})
+
+
+def read_maxmin(dev_name, identificator):
+    print('read_maxmin')
+    #my_dev_name = request.POST.get('dev_name')
+    my_dev_name = dev_name
+    print('my_dev_name = ')
+    print(my_dev_name)
+    now = timezone.now()
+
+    try:
+        print('try...')
+        q = device.objects.filter(identificator=identificator, devname=my_dev_name)
+        my_dev = q.order_by('datetime')
+
+        comment = []
+        ident = []
+        devname = []
+        mac = []
+        dt = []
+        gazname = []
+        tmin = []
+        tmax = []
+        hmin = []
+        hmax = []
+        gmin = []
+        gmax = []
+
+
+        for LI in my_dev:
+            comment.append(LI.comment)
+            ident.append(LI.identificator)
+            devname.append(LI.devname)
+            mac.append(LI.mac)
+            dt.append(LI.datetime)
+            gazname.append(LI.gazname)
+
+            tmin.append(LI.tmin)
+            tmax.append(LI.tmax)
+            hmin.append(LI.hmin)
+            hmax.append(LI.hmax)
+            gmin.append(LI.gmin)
+            gmax.append(LI.gmax)
+
+        print('comment =')
+        print(comment[-1])
+        print('devname =')
+        print(devname[-1])
+        print('mac =')
+        print(mac[-1])
+        print('tmax =')
+        print(tmax[-1])
+        # 30:83:98:A2:6B:51
+
+    except:
+        print('except:')
+
+    v1 =  {'devname':my_dev_name, 'comment':comment[-1], 'gazname':gazname[-1],
+                                                    'tmin': tmin[-1],
+                                                    'tmax': tmax[-1],
+                                                    'hmin': hmin[-1],
+                                                    'hmax': hmax[-1],
+                                                    'gmin': gmin[-1],
+                                                    'gmax': gmax[-1],
+                                                    }
+    return v1

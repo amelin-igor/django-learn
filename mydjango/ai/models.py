@@ -103,8 +103,16 @@ class device(models.Model):
     user = models.ForeignKey(User, verbose_name= 'Пользователь', on_delete = models.CASCADE)
     mac = models.CharField(max_length=20, verbose_name='MAC-адрес', default='30:83:98:A2:6B:50')
     devname = models.CharField(max_length=20, verbose_name='Имя устройства', default='No Name')
+    gazname = models.CharField(max_length=20, verbose_name='Название газа', default='No Name')
     comment = models.CharField(max_length=200, verbose_name='Комментарий к действию', default='No comments')
     identificator = models.CharField(max_length=10, verbose_name='Идентификатор копмлекта (аппаратуры)', default='00001')
+    tmin = models.IntegerField(verbose_name='Минимально допустимая температура', default=0)
+    tmax = models.IntegerField(verbose_name='Максимально допустимая температура', default=100)
+    hmin = models.IntegerField(verbose_name='Минимально допустимая влажность', default=0)
+    hmax = models.IntegerField(verbose_name='Максимально допустимая влажность', default=100)
+    gmin = models.IntegerField(verbose_name='Минимально допустимая влажность', default=0)
+    gmax = models.IntegerField(verbose_name='Максимально допустимая влажность', default=1000)
+
     datetime = models.DateTimeField('дата действия')
 
     def __str__(self):

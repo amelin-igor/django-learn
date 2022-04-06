@@ -1,6 +1,6 @@
 /venv/
 /.idea/
-cow.log
+*.log
 db.sqlite3
 settings.py
 mydjango/ai/__pycache__/
@@ -9,3 +9,4 @@ mydjango/manage.py
 mydjango/ai/__pycache__/models.cpython-38.pyc
 mydjango/webex/__pycache__/views.cpython-38.pyc
 sendgrid.env
+config.py

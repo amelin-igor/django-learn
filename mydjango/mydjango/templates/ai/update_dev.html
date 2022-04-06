@@ -42,6 +42,23 @@
         </br>
         <input id="comment" name="comment" type="text" placeholder="comment"  value="{{comment_2}}"   >  - описание устройства (например: датчик на кухне)  </br>
         </br>
+        <input id="gazname" name="gazname" type="text" placeholder="gazname"  value="{{gazname_2}}"   >  - отслеживаемый газ (например: CH4, LPG или CO)  </br>
+        </br>
+        <input id="tmin" name="tmin" type="text" placeholder="tmin"  value="{{tmin_2}}"   >  - нижнее пороговое значение температуры (<sup>o</sup>C)  </br>
+        </br>
+        <input id="tmax" name="tmax" type="text" placeholder="tmax"  value="{{tmax_2}}"   >  - верхнее пороговое значение температуры (<sup>o</sup>C)  </br>
+        </br>
+
+        <input id="hmin" name="hmin" type="text" placeholder="hmin"  value="{{hmin_2}}"   >  - нижнее пороговое значение влажности воздуха (%)  </br>
+        </br>
+        <input id="hmax" name="hmax" type="text" placeholder="hmax"  value="{{hmax_2}}"   >  - верхнее пороговое значение влажности воздуха (%)  </br>
+        </br>
+
+        <input id="gmin" name="gmin" type="text" placeholder="gmin"  value="{{gmin_2}}"   >  - нижнее пороговое значение концентрации газа (ppm)  </br>
+        </br>
+        <input id="gmax" name="gmax" type="text" placeholder="gmax"  value="{{gmax_2}}"   >  - верхнее пороговое значение концентрации газа (ppm)  </br>
+        </br>
+
         {% if request.user.is_superuser %}
              <input id="devname" name="devname" type="text" placeholder="devname"  value="{{devname_2}}"   >  - имя устройства только для суперюзера (например: Francheska)  </br>
             </br>
