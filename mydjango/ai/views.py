@@ -99,8 +99,6 @@ password = {
 }
 
 
-# http://127.0.0.1:8000/add/?login=FERM1&pasw=1&name=Buryonka&t=38&h=25&co2=7&ch4=31&n2o=17
-# http://127.0.0.1:8000/add/?login=FERM2&pasw=2&name=Vestka&t=38&h=25&co2=2&ch4=21&n2o=11
 
 # Create your views here.
 
