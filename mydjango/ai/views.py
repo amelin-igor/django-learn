@@ -247,7 +247,7 @@ def add(request):
         m.save()
         v1 = my_condition_2(request)
         v2 = read_maxmin(name, login)
-        print(v2)
+        print(v1)
 
         if v1['dev_1'] == 'fals' or v1['dev_1'] == None:
             v1['dev_1'] = False
@@ -259,45 +259,61 @@ def add(request):
         else:
             v1['dev_2'] = True
 
-        if v1['dev_3'] == 'false' or v1['dev_3'] == None:
+        if v1['dev_3'] == 'fals' or v1['dev_3'] == None:
             v1['dev_3'] = False
         else:
             v1['dev_3'] = True
 
-        change = False
+        narush = False
         comment =''
+        v1_old = v1['dev_1']
+        print(v1)
 
         if int(t) > v2['tmax']:
             s = "Внимание к комплекту: " + v1["identificator"] + " " + name + ": температура = " + t + ' C /'+ str(now)
+            s2 = "Комплект: " + v1["identificator"] + " " + name + ": t = " + t + ' C /' + str(now)
             test = telegram_bot_sendtext(s)
             print(test)
             v1["dev_1"] = True  # включить лампоску Тревога
-            change = True
-            comment = comment + ' ' + s
+            narush = True
+            comment = comment + ' ' + s2
+
 
         if int(h) > v2['hmax']:
-            s = "Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' % /'+ str(now)
+            s = "Внимание к комплекту: " + v1["identificator"] + " " + name + ": влажность = " + h + ' % /'+ str(now)
+            s2 = "Комплект: " + v1["identificator"] + " " + name + ": h = " + h + ' % /' + str(now)
             test = telegram_bot_sendtext(s)
             print(test)
             v1["dev_1"] = True  # включить лампоску Тревога
-            change = True
-            comment = comment + ' ' + s
+            narush = True
+            comment = comment + ' ' + s2
+
 
 
         if int(co2) > v2['gmax']:
-            s = "Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm /'+ str(now)
+            s = "Внимание к комплекту: " + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm /'+ str(now)
+            s2 = "Комплект: " + v1[
+                "identificator"] + " " + name + ": g = " + co2 + ' ppm /' + str(now)
             test = telegram_bot_sendtext(s)
             print(test)
             v1["dev_1"] = True #включить лампоску Тревога
-            change = True
-            comment = comment + ' ' + s
+            narush = True
+            comment = comment + ' ' + s2
 
-        if change == True:
-            m = my_control(user_id=v1['uid'], dev_1=v1['dev_1'], dev_2=v1['dev_3'], dev_3=v1['dev_3'],
+        if narush == True:
+            m = my_control(user_id=v1['uid'], dev_1=v1['dev_1'], dev_2=v1['dev_2'], dev_3=v1['dev_3'],
                        comment=comment,
                        phone='+7 (495) 777-77-77', datetime=now, identificator=login, my_delay=v1['my_delay'])
             m.save()
+        else:
+            v1["dev_1"] = False  # выключить лампоску Тревога
 
+        if v1["dev_1"] != v1_old and v1_old == True:
+            #comment = "Нормализация в комплекте: " + v1["identificator"] + " " + name + ": t = " + t + ' C /' + str(now)
+            m = my_control(user_id=v1['uid'], dev_1=v1['dev_1'], dev_2=v1['dev_2'], dev_3=v1['dev_3'],
+                           comment=comment,
+                           phone='+7 (495) 777-77-77', datetime=now, identificator=login, my_delay=v1['my_delay'])
+            m.save()
 
         return JsonResponse(v1, safe=False)
     else:
