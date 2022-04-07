@@ -109,7 +109,8 @@ def telegram_bot_sendtext(bot_message):
 
    bot_token = TOKEN
    mybot_chatID = bot_chatID
-   send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + mybot_chatID + '&parse_mode=Markdown&text=' + bot_message
+   #send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + mybot_chatID + '&parse_mode=Markdown&text=' + bot_message
+   send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + mybot_chatID + '&text=' + bot_message
 
    response = requests.get(send_text)
 
@@ -2755,8 +2756,8 @@ def my_condition_3(request):
         try:
             #print("control = ")
             a = my_control.objects.filter(identificator=str(login))
-            print('a=')
-            print(a)
+            #print('a=')
+            #print(a)
             control = a.order_by('id')
             #print('a=')
             #print(a)
