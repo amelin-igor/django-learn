@@ -249,42 +249,54 @@ def add(request):
         v2 = read_maxmin(name, login)
         print(v2)
 
+        if v1['dev_1'] == 'fals' or v1['dev_1'] == None:
+            v1['dev_1'] = False
+        else:
+            v1['dev_1'] = True
+
+        if v1['dev_2'] == 'fals' or v1['dev_2'] == None:
+            v1['dev_2'] = False
+        else:
+            v1['dev_2'] = True
+
+        if v1['dev_3'] == 'false' or v1['dev_3'] == None:
+            v1['dev_3'] = False
+        else:
+            v1['dev_3'] = True
+
+        change = False
+        comment =''
+
         if int(t) > v2['tmax']:
-              test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": температура = " + t + ' C /'+ str(now))
-              print(test)
-              v1["dev_1"] = True  # включить лампоску Тревога
+            s = "Внимание к комплекту: " + v1["identificator"] + " " + name + ": температура = " + t + ' C /'+ str(now)
+            test = telegram_bot_sendtext(s)
+            print(test)
+            v1["dev_1"] = True  # включить лампоску Тревога
+            change = True
+            comment = comment + ' ' + s
+
         if int(h) > v2['hmax']:
-              test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' % /'+ str(now))
-              print(test)
-              v1["dev_1"] = True  # включить лампоску Тревога
+            s = "Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' % /'+ str(now)
+            test = telegram_bot_sendtext(s)
+            print(test)
+            v1["dev_1"] = True  # включить лампоску Тревога
+            change = True
+            comment = comment + ' ' + s
+
+
         if int(co2) > v2['gmax']:
-                test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm /'+ str(now))
-                print(test)
-                v1["dev_1"] = True #включить лампоску Тревога
+            s = "Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm /'+ str(now)
+            test = telegram_bot_sendtext(s)
+            print(test)
+            v1["dev_1"] = True #включить лампоску Тревога
+            change = True
+            comment = comment + ' ' + s
 
-
-       # if (v1["identificator"] == "00001" and name == "Vestka") or (v1["identificator"] == "1" and name == "Device_5"):
-        #     if int(co2) > 70:
-        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = "+ co2+' ppm')
-        #        print(test)
-        #        v1["dev_1"] = True #включить лампоску Тревога
-        #elif v1["identificator"] == "1" and name == "Device_3":
-        #    if int(co2) > 260:
-        #        test = telegram_bot_sendtext(
-        #            "Внимание к комплекту :" + v1["identificator"] + " " + name + ": концентрация газа = " + co2 + ' ppm')
-        #        print(test)
-        #        v1["dev_1"] = True  # включить лампоску Тревога#
-
-
-        #else:
-        #    if int(t) > 35:
-        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": температура = " + t + ' C')
-        #        print(test)
-        #        v1["dev_1"] = True  # включить лампоску Тревога
-        #    if int(h) > 60:
-        #        test = telegram_bot_sendtext("Внимание к комплекту :" + v1["identificator"] + " " + name + ": влажность = " + h + ' %')
-        #        print(test)
-        #        v1["dev_1"] = True  # включить лампоску Тревога
+        if change == True:
+            m = my_control(user_id=v1['uid'], dev_1=v1['dev_1'], dev_2=v1['dev_3'], dev_3=v1['dev_3'],
+                       comment=comment,
+                       phone='+7 (495) 777-77-77', datetime=now, identificator=login, my_delay=v1['my_delay'])
+            m.save()
 
 
         return JsonResponse(v1, safe=False)
@@ -2672,6 +2684,7 @@ def my_condition_2(request):
     dev_2 = []
     dev_3 = []
     delay = []
+    uid = []
 
     try:
         #print("control = ")
@@ -2687,12 +2700,14 @@ def my_condition_2(request):
             dev_2.append(c.dev_2)
             dev_3.append(c.dev_3)
             delay.append(c.my_delay)
+            uid.append(c.user_id)
 
         if len(dev_1) == 0:
             dev_1.append("False")
             dev_2.append("False")
             dev_3.append("False")
             delay.append(0)
+            uid.append(0)
 
         if dev_1[-1] == False or dev_1[-1] == None:
             d1 = 'fals'
@@ -2707,14 +2722,14 @@ def my_condition_2(request):
         else:
             d3 = 'true'
 
-        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1], 'exeption':'False'}
+        vocab = {'dev_1': d1, 'dev_2': d2, 'dev_3': d3, 'identificator': login, 'my_delay': delay[-1], 'exeption':'False', 'uid' : uid[-1] }
         print("my_condition_2.vocab = ")
         print(vocab)
         return (vocab)
 
     except:
         print('my_condition_2.except:')
-        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True'}
+        vocab = {'dev_1': 'fals', 'dev_2': 'fals', 'dev_3': 'fals', 'identificator': login, 'my_delay': 0, 'exeption': 'True', 'uid' : 0}
         print(vocab)
         return (vocab)
 
