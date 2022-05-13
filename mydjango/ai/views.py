@@ -300,7 +300,7 @@ def add(request):
             narush = True
             comment = comment + ' ' + s2
 
-        if login == '2' and v1["identificator"] == 'Device_3':
+        if login == '2' and name == 'Device_3':
             if int(co2) > v2['gmax']:
                 s = "Внимание к комплекту: " + v1[
                     "identificator"] + " " + name + ": сухость почвы выше нормы = " + co2 + '  /' + str(now)
