@@ -3224,6 +3224,7 @@ def save_dev(request):
             print(ident[-1])
             print('devname =')
             print(devname[-1])
+            identificator = ident[-1]
 
         except:
             print('except:')
