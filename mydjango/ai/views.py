@@ -300,6 +300,16 @@ def add(request):
             narush = True
             comment = comment + ' ' + s2
 
+        if login == '2' and v1["identificator"] == 'Device_3':
+            if int(co2) > v2['gmax']:
+                s = "Внимание к комплекту: " + v1[
+                    "identificator"] + " " + name + ": сухость почвы выше нормы = " + co2 + '  /' + str(now)
+                test = telegram_bot_sendtext(s)
+                print(test)
+                v1["dev_3"] = True  # включить полив
+            else:
+                v1["dev_3"] = False  # выключить полив
+
         if narush == True:
             m = my_control(user_id=v1['uid'], dev_1=v1['dev_1'], dev_2=v1['dev_2'], dev_3=v1['dev_3'],
                        comment=comment,
